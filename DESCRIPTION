@@ -1,0 +1,23 @@
+Package: RFclust.SGE
+Title: Unsupervised clustering using random forest run on SGE
+Version: 0.0.0.9000
+Authors@R: person("Stefan", "Lang", email = "Stefan.Lang@med.lu.se", role = c("aut", "cre"))
+Description: This package uses the RF clustering method described at https://
+    labs.genetics.ucla.edu/horvath/RFclustering/RFclustering.htm. The function is
+    broken down into separate parts, that can be run on a SGE to reduce analysis
+    time.
+Depends:
+    R (>= 3.2.3)
+License: MIT
+LazyData: true
+Collate:
+    'Class.R'
+    'RFclust.SGE.R'
+    'Interface.R'
+Imports:
+    MASS,
+    cluster,
+    survival,
+    randomForest,
+    Hmisc
+RoxygenNote: 5.0.1
