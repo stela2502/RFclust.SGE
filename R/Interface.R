@@ -22,7 +22,11 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
+			if ( length(grep( '^/', tmp.path, perl=T)) == 0 ){
+				stop( 'I need the absolute path for the temp path' )
+			}
 			ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices )
+			
 			} 
 )
 
@@ -53,18 +57,179 @@ setMethod('show', signature = c ('RFclust.SGE'),
 #' @param x the RFclust.SGE object
 #' @param ntree the number of trees to grow
 #' @param nforest the nuber of forests to create
+#' @param name the name of the random forest clustering run (if you want to run multiple)
 #' @title description of function runRFclust
+#' @return a distRF object to be analyzed by pamNew
 #' @export 
 setGeneric('runRFclust',
-		function (x, ntree=500, nforest=500 ){
+		function (x, ntree=500, nforest=500, name="RFrun" ){
 			standardGeneric('runRFclust')
 		}
 )
 setMethod('runRFclust', signature = c ('RFclust.SGE'),
-		definition = function ( x, ntree=500, nforest=500  ) {
-			datRF = calculate.RF(x@dat,  ntree=ntree, no.rep=nforest )
-			distRF = RFdist( datRF ,x@dat, imp=TRUE , no.tree=ntree )
-			distRF
+		definition = function ( x, ntree=500, nforest=500, name="RFrun"  ) {
+			## the most simple - one core no whistles
+			if ( ! is.null(x@RFfiles[[name]])) {
+				## OK - check if they are done and summarize the results
+				notDone=FALSE
+				for ( f in x@RFfiles[[name]] ){
+					if ( locked(f) ) {
+						notDone = TRUE
+						break
+					}
+				}
+				if ( notDone ){ stop( "Process has not finished!") }
+				datRF = read.RF( x, name, 20 )
+				x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
+				names(x@distRF)[length(x@distRF) ] = name
+				x@RFfiles[[name]] <- NULL
+			}
+			else {
+				if ( x@slices == 1 && ! x@SGE ) {
+					datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=ntree, no.rep=nforest )
+					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
+					names(x@distRF)[length(x@distRF) ] = name
+				}
+				else {
+					## (1) create the RF object file
+					srcObj = paste(sep='/', x@tmp.path,'RFclust.SGE.RData' )
+					save( x, file= srcObj)
+					## (2) create and run x@slices worker files
+					this.forests = round(nforest/x@slices )
+					scripts = vector('character', length= x@slices )
+					for ( i in 1:x@slices ) {
+						ret <- writeRscript( x, paste('runRFclust',name,i,sep='_'), ntree=ntree, nforest=this.forests,srcObj=srcObj, run = !x@SGE )
+						if ( x@SGE ){
+							writeSGEscript( x, paste('runRFclust',name,i,sep='_'), ret$cmd )
+						}
+						scripts[i] <- ret$data
+					}
+					x@RFfiles[[ length(x@RFfiles) +1 ]] <- scripts
+					names(x@RFfiles)[ length(x@RFfiles) ] = name
+					print ( "The data is going to be analyszed now - re-run this function to check if the process has finished.")
+					## now the data should become anayzed - re-running this function should then cluster the data
+				}
+			}
+			x
+		}
+)
+
+
+
+#' @name writeRscript
+#' @aliases writeRscript,RFclust.SGE-method
+#' @rdname writeRscript-methods
+#' @docType methods
+#' @description run the random forest calculations returning the density matrix
+#' @description at the moment without SGE support and single core
+#' @param filename the filename to save the R script to (has to be unique for the analysis!)
+#' @param ntree the number of trees to grow
+#' @param nforest the nuber of forests to create
+#' @title description of function writeRscript
+#' @return a filename for the expected data
+#' @export 
+setGeneric('writeRscript',
+		function (x,filename, ntree=500, nforest=500, run=TRUE, srcObj ){
+			standardGeneric('writeRscript')
+		}
+)
+setMethod('writeRscript', signature = c ('RFclust.SGE'),
+		definition = function ( x,filename, ntree=500, nforest=500, run=TRUE, srcObj  ) {
+			wp <- paste(sep='/', x@tmp.path, filename )
+			rscript <-  paste(wp, '.R', sep='')
+			Rdata <-  paste(wp, '.RData', sep='')
+			fileConn<-file( rscript )
+			writeLines ( c( 'library(RFclust.SGE)', 
+							paste('set.lock("',Rdata,'")',sep=''),
+							paste('load("',srcObj,'")', sep='' ),
+							'#reads object x',
+							paste('datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=',ntree,', no.rep=',nforest,' )'),
+							paste('save( datRF, file="',Rdata,'")', sep='' ),
+							paste('release.lock("',Rdata,'")',sep='')
+					), con=fileConn )
+			close(fileConn)
+			cmd <- paste('R CMD BATCH --no-save --no-restore --no-readline --', rscript, "&" ) 
+			if ( run ) {
+				system( cmd )
+			}
+			list( data=Rdata, script=rscript, cmd=cmd )
+		}
+)
+
+
+#' @name writeSGEscript
+#' @aliases writeSGEscript,RFclust.SGE-method
+#' @rdname writeSGEscript-methods
+#' @docType methods
+#' @description run the random forest calculations returning the density matrix
+#' @description at the moment without SGE support and single core
+#' @param x the RFclust.SGE object
+#' @param ntree the number of trees to grow
+#' @param nforest the nuber of forests to create
+#' @title description of function writeSGEscript
+#' @return a distRF object to be analyzed by pamNew
+#' @export 
+setGeneric('writeSGEscript',
+		function ( x, cmd ){
+			standardGeneric('writeSGEscript')
+		}
+)
+setMethod('writeSGEscript', signature = c ('RFclust.SGE'),
+		definition = function ( x,filename, cmd  ) {
+			wp <- paste(sep='/', x@tmp.path, filename )
+			script <- paste(wp, '.sh', sep='')
+			fileConn<-file( script )
+			writeLines ( c("#!/bin/bash",
+			"#$ -l mem_free=1Gb",
+			"#$ -S /bin/bash",
+			paste("#$ -M",x@email),
+			"#$ -m eas" ,"#$ -pe orte 1",cmd
+			), con=fileConn )
+			close(fileConn)
+			system( paste("qsub",script) )
+		}
+)
+
+
+#' @name createGroups
+#' @aliases 'createGroups,RFclust.SGE-method
+#' @rdname 'createGroups-methods
+#' @docType methods
+#' @description get a grouping table from the distRF object
+#' @param x RFclust.SGE object after a call to runRFclust()
+#' @param k the number of expected groupings or a vector of expected groupings
+#' @param name the name of the rf analysis
+#' @title description of function randomForest
+#' @return a distRF object to be analyzed by pamNew
+#' @export 
+setGeneric('createGroups',
+		function ( x, k, name='RFrun' ){
+			standardGeneric('createGroups')
+		}
+)
+setMethod('createGroups', signature = c ('RFclust.SGE'),
+		definition = function (x, k, name='RFrun' ) {
+			n = k[1]
+			persistingCells <- colnames( x@dat )
+			res = pamNew(x@distRF[[name]]$cl1, n )
+			N <- names( res )
+			N <- intersect( persistingCells, N )
+			userGroups <- matrix(ncol=3, nrow=0)
+			for ( a in 1:length(N) ){
+				userGroups <- rbind (userGroups, c( N[a], 'no info', as.numeric(res[[N[a]]]) ) )
+			}
+			for ( i in 2:length(k) ) {
+				if ( i > 1) {
+					res = pamNew(x@distRF[[name]]$cl1, k[i] )
+					n <- vector('numeric', length= length(N))
+					for ( a in 1:length(N) ){
+						n[a] <- as.numeric(res[[N[a]]])
+					}
+					userGroups <- cbind( userGroups, n )
+				}
+			}
+			colnames(userGroups) <- c('cellName', 'userInput',  paste ('group n=', k) )
+			userGroups
 		}
 )
 

@@ -6,7 +6,7 @@
 \alias{calculate.RF,RFclust.SGE-method}
 \title{description of function calculate.RF}
 \usage{
-calculate.RF(dat, datRF = NULL, mtry1 = 3, no.rep = 20, no.tree = 500,
+calculate.RF(datRF = NULL, mtry1 = 3, no.rep = 20, no.tree = 500,
   addcl1 = TRUE, addcl2 = FALSE, imp = T, oob.prox1 = T, max.syn = 50)
 }
 \arguments{

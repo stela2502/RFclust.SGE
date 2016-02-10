@@ -7,7 +7,7 @@ Description: This package uses the RF clustering method described at https://
     broken down into separate parts, that can be run on a SGE to reduce analysis
     time.
 Depends:
-    R (>= 3.2.3)
+    R (>= 3.2.0)
 License: MIT
 LazyData: true
 Collate:

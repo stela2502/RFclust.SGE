@@ -7,6 +7,8 @@
 #' @slot slices the number of slices the data should be analyzed in
 #' @slot tmp.path the temp path for the clustering results
 #' @slot SGE run using Sun Grid Engine (default=F)
+#' @slot distRF the density data (internal use only)
+#' @slot RFfiles an internal list of RF files (internal use only)
 #' @source \url{https://labs.genetics.ucla.edu/horvath/RFclustering/RFclustering.htm}
 #' @exportClass RFclust.SGE
 setClass( 
@@ -16,9 +18,11 @@ setClass(
 				email='character',
 				slices='numeric',
 				tmp.path='character',
-				SGE='logical'
+				SGE='logical',
+				distRF='list',
+				RFfiles='list'
 		),
 		prototype(tmp.path =NA_character_,  email = NA_character_, 
-				slices =32, SGE=FALSE
+				slices =32, SGE=FALSE, distRF=list(), RFfiles=list()
 		)
 )

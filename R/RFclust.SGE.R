@@ -72,7 +72,7 @@ setGeneric('pamNew', ## Name
 	}
 )
 
-setMethod('pamNew', signature = c ('RFclust.SGE'),
+setMethod('pamNew', signature = c ('matrix'),
 	definition = function (x, k, diss1 = inherits(x, "dist"), metric1 = "euclidean") {
 	
 	if (diss1)
@@ -85,7 +85,7 @@ setMethod('pamNew', signature = c ('RFclust.SGE'),
 		if(!is.null(dimnames(x)[[1]])) { original.row.names <- dimnames(x)[[1]]}
 		row.names(x) <- as.character(c(1:dim(x)[[1]]))
 	}
-	pam1 <- pam(x,k,diss=diss1, metric=metric1)
+	pam1 <- cluster::pam(x,k,diss=diss1, metric=metric1)
 	label2 <- pam1$clustering
 	silinfo1 <- pam1$silinfo$widths
 	index1 <- as.numeric(as.character(row.names(silinfo1)))
@@ -108,7 +108,7 @@ setGeneric('collect.garbage', ## Name
 	}
 )
 
-setMethod('collect.garbage', signature = c ('character'),
+setMethod('collect.garbage', signature = c ('missing'),
 	definition = function (x='A') {
 
 	while (gc()[2,4] != gc()[2,4]){}
@@ -208,6 +208,7 @@ setMethod('RFdist', signature = c ('list'),
 #' @description set a lock for a file (threading)
 #' @param filename  the locked file
 #' @title description of function set_lock
+#' @export 
 setGeneric('set.lock', ## Name
 	function ( filename ) { ## Argumente der generischen Funktion
 		standardGeneric('set.lock') ## der Aufruf von standardGeneric sorgt für das Dispatching
@@ -225,6 +226,7 @@ setMethod('set.lock', signature = c ('character'),
 #' @description releases the lock of a file (threading)
 #' @param filename  the locked file
 #' @title description of function release_lock
+#' @export 
 setGeneric('release.lock', ## Name
 	function ( filename ) { ## Argumente der generischen Funktion
 		standardGeneric('release.lock') ## der Aufruf von standardGeneric sorgt für das Dispatching
@@ -242,6 +244,7 @@ setMethod('release.lock', signature = c ('character'),
 #' @description simple check for a file lock (threading)
 #' @param filename  lock this file
 #' @title description of function locked
+#' @export 
 setGeneric('locked', ## Name
 	function ( filename ) { ## Argumente der generischen Funktion
 		standardGeneric('locked') ## der Aufruf von standardGeneric sorgt für das Dispatching
@@ -267,21 +270,18 @@ setMethod('locked', signature = c ('character'),
 #' @title description of function read.RF
 #' @export 
 setGeneric('read.RF', ## Name
-	function ( files=c(''), max.wait = 20 ) { ## Argumente der generischen Funktion
+	function (x, name, max.wait = 20 ) { ## Argumente der generischen Funktion
 		standardGeneric('read.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
 	}
 )
 
 setMethod('read.RF', signature = c ('RFclust.SGE'),
-	definition = function ( files=c(''), max.wait = 20 ) {
+	definition = function (x, name, max.wait = 20 ) {
 	returnRF <- NULL
 	waited = 0
-	Sys.sleep(20) ## sleep 20 sec
-	read <- 0
+	read = 0
+	files <- x@RFfiles[[name]]
 	while ( read < length(files) ){
-		if (waited /3 >= max.wait ) {
-			stop ( "Sorry the other processes did not finish in time" )
-		}
 		if (locked( files[1]) ) {
 			print ( paste ( "wating for files to unlock!  ( n =",waited,")"))
 		}
@@ -290,14 +290,14 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 				if ( ! locked( files[i]) ) {
 					if ( i == 1 ){
 						load(files[i])
-						returnRF <- Rf.data
+						returnRF <- datRF
 						read = read +1
 					}
 					else {
 						load(files[i])
 						a <- 1 + length(returnRF)
-						for ( z in 1:length(Rf.data)){
-							returnRF[[a]] <- Rf.data[[z]]
+						for ( z in 1:length(datRF)){
+							returnRF[[a]] <- datRF[[z]]
 							a = a +1
 						}
 						read = read +1
@@ -366,13 +366,13 @@ setMethod('save.RF', signature = c ('RFclust.SGE'),
 #' @title description of function calculate.RF
 #' @export 
 setGeneric('calculate.RF', ## Name
-	function (dat, datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) { ## Argumente der generischen Funktion
+	function ( datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) { ## Argumente der generischen Funktion
 		standardGeneric('calculate.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
 	}
 )
 
-setMethod('calculate.RF', signature = c ('RFclust.SGE'),
-	definition = function (dat, datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) {
+setMethod('calculate.RF', signature = c ('data.frame'),
+	definition = function ( datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) {
 	
 	synthetic1 <- function(dat, syn.n=NULL) {
 		sample1 <- function(X)   { sample(X, replace=T) } 
