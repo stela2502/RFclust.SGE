@@ -25,7 +25,10 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			if ( length(grep( '^/', tmp.path, perl=T)) == 0 ){
 				stop( 'I need the absolute path for the temp path' )
 			}
-			ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices )
+			if ( SGE && email=='') {
+				stop( "If you plan to use SGE I need an email from you!" )
+			}
+			ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=SGE )
 			
 			} 
 )
@@ -135,6 +138,7 @@ setGeneric('writeRscript',
 )
 setMethod('writeRscript', signature = c ('RFclust.SGE'),
 		definition = function ( x,filename, ntree=500, nforest=500, run=TRUE, srcObj  ) {
+			print ( paste( "Run =",run)) 
 			wp <- paste(sep='/', x@tmp.path, filename )
 			rscript <-  paste(wp, '.R', sep='')
 			Rdata <-  paste(wp, '.RData', sep='')
@@ -148,9 +152,9 @@ setMethod('writeRscript', signature = c ('RFclust.SGE'),
 							paste('release.lock("',Rdata,'")',sep='')
 					), con=fileConn )
 			close(fileConn)
-			cmd <- paste('R CMD BATCH --no-save --no-restore --no-readline --', rscript, "&" ) 
+			cmd <- paste('R CMD BATCH --no-save --no-restore --no-readline --', rscript ) 
 			if ( run ) {
-				system( cmd )
+				system( paste(cmd,"&" ) )
 			}
 			list( data=Rdata, script=rscript, cmd=cmd )
 		}
@@ -164,13 +168,13 @@ setMethod('writeRscript', signature = c ('RFclust.SGE'),
 #' @description run the random forest calculations returning the density matrix
 #' @description at the moment without SGE support and single core
 #' @param x the RFclust.SGE object
-#' @param ntree the number of trees to grow
-#' @param nforest the nuber of forests to create
+#' @param filename the base filename for the script (path and .sh will be added!)
+#' @param cmd the command to include in the SGE script. Make sure, that all path entries are valid on the nodes!  
 #' @title description of function writeSGEscript
 #' @return a distRF object to be analyzed by pamNew
 #' @export 
 setGeneric('writeSGEscript',
-		function ( x, cmd ){
+		function ( x, filename, cmd ){
 			standardGeneric('writeSGEscript')
 		}
 )
@@ -186,6 +190,7 @@ setMethod('writeSGEscript', signature = c ('RFclust.SGE'),
 			"#$ -m eas" ,"#$ -pe orte 1",cmd
 			), con=fileConn )
 			close(fileConn)
+			print ( script )
 			system( paste("qsub",script) )
 		}
 )
