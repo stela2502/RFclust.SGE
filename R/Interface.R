@@ -184,7 +184,7 @@ setMethod('writeSGEscript', signature = c ('RFclust.SGE'),
 			script <- paste(wp, '.sh', sep='')
 			fileConn<-file( script )
 			writeLines ( c("#!/bin/bash",
-			"#$ -l mem_free=1Gb",
+			"#$ -l mem_free=1G",
 			"#$ -S /bin/bash",
 			paste("#$ -M",x@email),
 			"#$ -m eas" ,"#$ -pe orte 1",cmd
