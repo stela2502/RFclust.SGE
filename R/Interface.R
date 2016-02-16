@@ -25,6 +25,9 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			if ( length(grep( '^/', tmp.path, perl=T)) == 0 ){
 				stop( 'I need the absolute path for the temp path' )
 			}
+			if ( ! file.exists(tmp.path)){
+				dir.create( tmp.path )
+			}
 			if ( SGE && email=='') {
 				stop( "If you plan to use SGE I need an email from you!" )
 			}
@@ -65,13 +68,14 @@ setMethod('show', signature = c ('RFclust.SGE'),
 #' @return a distRF object to be analyzed by pamNew
 #' @export 
 setGeneric('runRFclust',
-		function (x, ntree=500, nforest=500, name="RFrun" ){
+		function (x, ntree=500, nforest=500, name="RFrun", force=FALSE ){
 			standardGeneric('runRFclust')
 		}
 )
 setMethod('runRFclust', signature = c ('RFclust.SGE'),
-		definition = function ( x, ntree=500, nforest=500, name="RFrun"  ) {
+		definition = function ( x, ntree=500, nforest=500, name="RFrun", force=FALSE ) {
 			## the most simple - one core no whistles
+			run = TRUE
 			if ( ! is.null(x@RFfiles[[name]])) {
 				## OK - check if they are done and summarize the results
 				notDone=FALSE
@@ -86,6 +90,10 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
 				names(x@distRF)[length(x@distRF) ] = name
 				x@RFfiles[[name]] <- NULL
+				run = FALSE
+			}
+			else if ( ! is.null( x@distRF[[ name ]] ) ) {
+				
 			}
 			else {
 				if ( x@slices == 1 && ! x@SGE ) {
@@ -109,7 +117,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 					}
 					x@RFfiles[[ length(x@RFfiles) +1 ]] <- scripts
 					names(x@RFfiles)[ length(x@RFfiles) ] = name
-					print ( "The data is going to be analyszed now - re-run this function to check if the process has finished.")
+					print (paste( name, ": The data is going to be analyszed now - re-run this function to check if the process has finished."))
 					## now the data should become anayzed - re-running this function should then cluster the data
 				}
 			}
@@ -138,7 +146,7 @@ setGeneric('writeRscript',
 )
 setMethod('writeRscript', signature = c ('RFclust.SGE'),
 		definition = function ( x,filename, ntree=500, nforest=500, run=TRUE, srcObj  ) {
-			print ( paste( "Run =",run)) 
+			#print ( paste( "Run =",run)) 
 			wp <- paste(sep='/', x@tmp.path, filename )
 			rscript <-  paste(wp, '.R', sep='')
 			Rdata <-  paste(wp, '.RData', sep='')
@@ -190,7 +198,7 @@ setMethod('writeSGEscript', signature = c ('RFclust.SGE'),
 			"#$ -m eas" ,"#$ -pe orte 1",cmd
 			), con=fileConn )
 			close(fileConn)
-			print ( script )
+		#	print ( script )
 			system( paste("qsub",script) )
 		}
 )
