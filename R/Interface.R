@@ -2,8 +2,7 @@
 #' @aliases RFclust.SGE,RFclust.SGE-method
 #' @rdname RFclust.SGE-methods
 #' @docType methods
-#' @description  create a new RFclust.SGE object This object is mainly used for plotting the
-#' @description  data
+#' @description  create a new RFclust.SGE object. The clustering will be performed on the columns of the data.frame.
 #' @param dat data frame or matrix containing all expression data
 #' @param tmp.path where to store the temporaray files
 #' @param SGE whether to use the Sun Grid Engine to calcualate
@@ -59,7 +58,7 @@ setMethod('show', signature = c ('RFclust.SGE'),
 #' @rdname runRFclust-methods
 #' @docType methods
 #' @description run the random forest calculations returning the density matrix
-#' @description at the moment without SGE support and single core
+#' @description the clusters will be created for the columns of the data.frame
 #' @param x the RFclust.SGE object
 #' @param ntree the number of trees to grow
 #' @param nforest the nuber of forests to create
@@ -93,7 +92,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				run = FALSE
 			}
 			else if ( ! is.null( x@distRF[[ name ]] ) ) {
-				
+				stop( "This analysis has already been performed! - change name")
 			}
 			else {
 				if ( x@slices == 1 && ! x@SGE ) {
@@ -103,7 +102,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				}
 				else {
 					## (1) create the RF object file
-					srcObj = paste(sep='/', x@tmp.path,'RFclust.SGE.RData' )
+					srcObj = paste(sep='/', x@tmp.path,paste('RFclust.SGE.',name,'.RData', sep='')  )
 					save( x, file= srcObj)
 					## (2) create and run x@slices worker files
 					this.forests = round(nforest/x@slices )

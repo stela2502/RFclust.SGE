@@ -21,8 +21,6 @@ RFclust.SGE(dat, tmp.path = "", email = "", slices = 32, SGE = FALSE)
 A new RFclust.SGE object
 }
 \description{
-create a new RFclust.SGE object This object is mainly used for plotting the
-
-data
+create a new RFclust.SGE object. The clustering will be performed on the columns of the data.frame.
 }
 

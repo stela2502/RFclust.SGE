@@ -6,7 +6,7 @@
 \alias{runRFclust,RFclust.SGE-method}
 \title{description of function runRFclust}
 \usage{
-runRFclust(x, ntree = 500, nforest = 500, name = "RFrun")
+runRFclust(x, ntree = 500, nforest = 500, name = "RFrun", force = FALSE)
 }
 \arguments{
 \item{x}{the RFclust.SGE object}
@@ -23,6 +23,6 @@ a distRF object to be analyzed by pamNew
 \description{
 run the random forest calculations returning the density matrix
 
-at the moment without SGE support and single core
+the clusters will be created for the columns of the data.frame
 }
 

@@ -6,14 +6,14 @@
 \alias{writeSGEscript,RFclust.SGE-method}
 \title{description of function writeSGEscript}
 \usage{
-writeSGEscript(x, ntree = 500, nforest = 500)
+writeSGEscript(x, filename, cmd)
 }
 \arguments{
 \item{x}{the RFclust.SGE object}
 
-\item{ntree}{the number of trees to grow}
+\item{filename}{the base filename for the script (path and .sh will be added!)}
 
-\item{nforest}{the nuber of forests to create}
+\item{cmd}{the command to include in the SGE script. Make sure, that all path entries are valid on the nodes!}
 }
 \value{
 a distRF object to be analyzed by pamNew
