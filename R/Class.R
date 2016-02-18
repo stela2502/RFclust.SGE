@@ -9,6 +9,7 @@
 #' @slot SGE run using Sun Grid Engine (default=F)
 #' @slot distRF the density data (internal use only)
 #' @slot RFfiles an internal list of RF files (internal use only)
+#' @slot name the name for this object that will be used to identify the data object in the spawned processes
 #' @source \url{https://labs.genetics.ucla.edu/horvath/RFclustering/RFclustering.htm}
 #' @exportClass RFclust.SGE
 setClass( 
@@ -20,7 +21,8 @@ setClass(
 				tmp.path='character',
 				SGE='logical',
 				distRF='list',
-				RFfiles='list'
+				RFfiles='list',
+				name='character',
 		),
 		prototype(tmp.path =NA_character_,  email = NA_character_, 
 				slices =32, SGE=FALSE, distRF=list(), RFfiles=list()

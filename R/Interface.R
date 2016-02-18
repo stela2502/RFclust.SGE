@@ -11,13 +11,13 @@
 #' @title description of function RFclust.SGE
 #' @export 
 setGeneric('RFclust.SGE', ## Name
-		function ( dat, tmp.path='', email='', slices=32, SGE=FALSE ) { ## Argumente der generischen Funktion
+		function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, name='RFclust' ) { ## Argumente der generischen Funktion
 			standardGeneric('RFclust.SGE') ## der Aufruf von standardGeneric sorgt für das Dispatching
 		}
 )
 
 setMethod('RFclust.SGE', signature = c ('data.frame'),
-		definition = function ( dat, tmp.path='', email='', slices=32, SGE=FALSE ) {
+		definition = function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, name='RFclust' ) {
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
@@ -50,6 +50,18 @@ setMethod('show', signature = c ('RFclust.SGE'),
 		else{print ( paste("SGE will NOT be used"))  }
 		print (paste( "Number of cores to use:",object@slices ))
 		print ( paste("files will be stored in", object@tmp.path))
+		if ( length(object@distRF) > 0) {
+			print ( paste ("A total of",length(object@distRF),"different anaysis have been run:") )
+			for ( i in 1:length(object@distRF ) ){
+				print ( names(object@distRF)[i] )
+			}
+		}
+		if ( length(object@RFfiles) > 0) {
+			print ( paste ("Running analysis for ",length(object@RFfiles),"analysis runs:") )
+			for ( i in 1:length(object@RFfiles ) ){
+				print ( names(object@RFfiles)[i] )
+			}
+		}
 	}
 )
 
@@ -102,7 +114,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				}
 				else {
 					## (1) create the RF object file
-					srcObj = paste(sep='/', x@tmp.path,paste('RFclust.SGE.',name,'.RData', sep='')  )
+					srcObj = paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep='')  )
 					save( x, file= srcObj)
 					## (2) create and run x@slices worker files
 					this.forests = round(nforest/x@slices )
