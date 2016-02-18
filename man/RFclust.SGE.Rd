@@ -27,5 +27,7 @@ An S4 class to run unsupervides clustering based on random forrest predictors us
 \item{\code{distRF}}{the density data (internal use only)}
 
 \item{\code{RFfiles}}{an internal list of RF files (internal use only)}
+
+\item{\code{name}}{the name for this object that will be used to identify the data object in the spawned processes}
 }}
 

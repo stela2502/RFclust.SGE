@@ -6,7 +6,8 @@
 \alias{RFclust.SGE,RFclust.SGE-method}
 \title{description of function RFclust.SGE}
 \usage{
-RFclust.SGE(dat, tmp.path = "", email = "", slices = 32, SGE = FALSE)
+RFclust.SGE(dat, tmp.path = "", email = "", slices = 32, SGE = FALSE,
+  name = "RFclust")
 }
 \arguments{
 \item{dat}{data frame or matrix containing all expression data}

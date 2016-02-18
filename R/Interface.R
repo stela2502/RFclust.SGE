@@ -103,8 +103,8 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
 			}
-			else if ( ! is.null( x@distRF[[ name ]] ) ) {
-				stop( "This analysis has already been performed! - change name")
+			else if ( file.exists( paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep='') & ! force ) ) ) {
+				stop ( "The source data has already been saved to disk - sure you want to re-run the analysis? use force=TRUE")
 			}
 			else {
 				if ( x@slices == 1 && ! x@SGE ) {

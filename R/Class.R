@@ -22,7 +22,7 @@ setClass(
 				SGE='logical',
 				distRF='list',
 				RFfiles='list',
-				name='character',
+				name='character'
 		),
 		prototype(tmp.path =NA_character_,  email = NA_character_, 
 				slices =32, SGE=FALSE, distRF=list(), RFfiles=list()
