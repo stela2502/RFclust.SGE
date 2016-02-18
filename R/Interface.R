@@ -30,7 +30,7 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			if ( SGE && email=='') {
 				stop( "If you plan to use SGE I need an email from you!" )
 			}
-			ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=SGE )
+			ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=SGE, name=name )
 			
 			} 
 )
@@ -45,21 +45,23 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 #' @export 
 setMethod('show', signature = c ('RFclust.SGE'),
 		definition = function ( object ) {
-		print ( paste("data frame with",nrow(object@dat),"and",ncol(object@dat),"columns" ))
-		if ( object@SGE ){ print ( paste("SGE will be used", "and the SGE will report to", object@email)) }
-		else{print ( paste("SGE will NOT be used"))  }
-		print (paste( "Number of cores to use:",object@slices ))
-		print ( paste("files will be stored in", object@tmp.path))
+			cat (paste("An object of class", class(object)),"\n" )
+			cat("named ",object@name,"\n")
+			cat ( paste("data frame with",nrow(object@dat),"and",ncol(object@dat),"columns" ))
+		if ( object@SGE ){ cat ( paste("SGE will be used", "and the SGE will report to", object@email)) }
+		else{cat ( paste("SGE will NOT be used"))  }
+		cat (paste( "Number of cores to use:",object@slices ))
+		cat ( paste("files will be stored in", object@tmp.path))
 		if ( length(object@distRF) > 0) {
-			print ( paste ("A total of",length(object@distRF),"different anaysis have been run:") )
+			cat ( paste ("A total of",length(object@distRF),"different anaysis have been run:") )
 			for ( i in 1:length(object@distRF ) ){
-				print ( names(object@distRF)[i] )
+				cat ( names(object@distRF)[i] )
 			}
 		}
 		if ( length(object@RFfiles) > 0) {
-			print ( paste ("Running analysis for ",length(object@RFfiles),"analysis runs:") )
+			cat ( paste ("Running analysis for",length(object@RFfiles),"analysis runs:") )
 			for ( i in 1:length(object@RFfiles ) ){
-				print ( names(object@RFfiles)[i] )
+				cat ( names(object@RFfiles)[i] )
 			}
 		}
 	}
@@ -103,10 +105,12 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
 			}
-			else if ( file.exists( paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep='') & ! force ) ) ) {
+			else if ( file.exists( paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep=''))) & ! force  ) {
 				stop ( "The source data has already been saved to disk - sure you want to re-run the analysis? use force=TRUE")
 			}
 			else {
+				
+				
 				if ( x@slices == 1 && ! x@SGE ) {
 					datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=ntree, no.rep=nforest )
 					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
@@ -114,7 +118,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				}
 				else {
 					## (1) create the RF object file
-					srcObj = paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep='')  )
+					srcObj = paste(sep='/', x@tmp.path,paste( x@name,'.RData', sep='')  )
 					save( x, file= srcObj)
 					## (2) create and run x@slices worker files
 					this.forests = round(nforest/x@slices )
