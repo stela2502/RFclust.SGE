@@ -14,7 +14,7 @@ Collate:
     'Class.R'
     'RFclust.SGE.R'
     'Interface.R'
-Imports:
+Depends:
     MASS,
     cluster,
     survival,
