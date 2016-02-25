@@ -49,19 +49,19 @@ setMethod('show', signature = c ('RFclust.SGE'),
 			cat("named ",object@name,"\n")
 			cat ( paste("data frame with",nrow(object@dat),"and",ncol(object@dat),"columns" ))
 		if ( object@SGE ){ cat ( paste("SGE will be used", "and the SGE will report to", object@email)) }
-		else{cat ( paste("SGE will NOT be used"))  }
-		cat (paste( "Number of cores to use:",object@slices ))
-		cat ( paste("files will be stored in", object@tmp.path))
+		else{cat ( paste("SGE will NOT be used\n"))  }
+		cat (paste( "Number of cores to use:",object@slices,"\n"))
+		cat ( paste("files will be stored in", object@tmp.path,"\n"))
 		if ( length(object@distRF) > 0) {
-			cat ( paste ("A total of",length(object@distRF),"different anaysis have been run:") )
+			cat ( paste ("A total of",length(object@distRF),"different anaysis have been run:","\n") )
 			for ( i in 1:length(object@distRF ) ){
-				cat ( names(object@distRF)[i] )
+				print ( names(object@distRF)[i] )
 			}
 		}
 		if ( length(object@RFfiles) > 0) {
-			cat ( paste ("Running analysis for",length(object@RFfiles),"analysis runs:") )
+			cat ( paste ("Running analysis for",length(object@RFfiles),"analysis runs:\n") )
 			for ( i in 1:length(object@RFfiles ) ){
-				cat ( names(object@RFfiles)[i] )
+				print ( names(object@RFfiles)[i] )
 			}
 		}
 	}
@@ -238,6 +238,7 @@ setGeneric('createGroups',
 setMethod('createGroups', signature = c ('RFclust.SGE'),
 		definition = function (x, k, name='RFrun' ) {
 			n = k[1]
+			browser()
 			persistingCells <- colnames( x@dat )
 			res = pamNew(x@distRF[[name]]$cl1, n )
 			N <- names( res )
