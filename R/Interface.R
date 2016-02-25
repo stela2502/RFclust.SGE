@@ -238,8 +238,8 @@ setGeneric('createGroups',
 setMethod('createGroups', signature = c ('RFclust.SGE'),
 		definition = function (x, k, name='RFrun' ) {
 			n = k[1]
-			browser()
-			persistingCells <- colnames( x@dat )
+			#browser()
+			persistingCells <- colnames(  )
 			res = pamNew(x@distRF[[name]]$cl1, n )
 			N <- names( res )
 			N <- intersect( persistingCells, N )
