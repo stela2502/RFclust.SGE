@@ -246,14 +246,16 @@ setMethod('createGroups', signature = c ('RFclust.SGE'),
 			for ( a in 1:length(N) ){
 				userGroups <- rbind (userGroups, c( N[a], 'no info', as.numeric(res[[N[a]]]) ) )
 			}
-			for ( i in 2:length(k) ) {
-				if ( i > 1) {
-					res = pamNew(x@distRF[[name]]$cl1, k[i] )
-					n <- vector('numeric', length= length(N))
-					for ( a in 1:length(N) ){
-						n[a] <- as.numeric(res[[N[a]]])
+			if ( length(k) > 1 ){
+				for ( i in 2:length(k) ) {
+					if ( i > 1) {
+						res = pamNew(x@distRF[[name]]$cl1, k[i] )
+						n <- vector('numeric', length= length(N))
+						for ( a in 1:length(N) ){
+							n[a] <- as.numeric(res[[N[a]]])
+						}
+						userGroups <- cbind( userGroups, n )
 					}
-					userGroups <- cbind( userGroups, n )
 				}
 			}
 			colnames(userGroups) <- c('cellName', 'userInput',  paste ('group n=', k) )
