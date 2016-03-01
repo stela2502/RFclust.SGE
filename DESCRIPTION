@@ -6,8 +6,6 @@ Description: This package uses the RF clustering method described at https://
     labs.genetics.ucla.edu/horvath/RFclustering/RFclustering.htm. The function is
     broken down into separate parts, that can be run on a SGE to reduce analysis
     time.
-Depends:
-    R (>= 3.0.0)
 License: MIT
 LazyData: true
 Collate:
