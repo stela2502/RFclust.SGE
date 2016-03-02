@@ -89,7 +89,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 		definition = function ( x, ntree=500, nforest=500, name="RFrun", force=FALSE ) {
 			## the most simple - one core no whistles
 			run = TRUE
-			if ( ! ( is.null(x@RFfiles[[name]]) + is.null(x@distRF[[name]] ) ) ) {
+			if ( ! is.null(x@RFfiles[[name]])  ) {
 				## OK - check if they are done and summarize the results
 				notDone=FALSE
 				for ( f in x@RFfiles[[name]] ){
