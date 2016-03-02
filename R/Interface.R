@@ -105,12 +105,13 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
 			}
+			else if ( ! is.null(x@distRF[[name]]) ){
+				print ( "This has already been analyzed!" )
+			}
 			else if ( file.exists( paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep=''))) & ! force  ) {
 				stop ( "The source data has already been saved to disk - sure you want to re-run the analysis? use force=TRUE")
 			}
 			else {
-				
-				
 				if ( x@slices == 1 && ! x@SGE ) {
 					datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=ntree, no.rep=nforest )
 					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
