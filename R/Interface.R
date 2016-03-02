@@ -89,7 +89,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 		definition = function ( x, ntree=500, nforest=500, name="RFrun", force=FALSE ) {
 			## the most simple - one core no whistles
 			run = TRUE
-			if ( ! is.null(x@RFfiles[[name]])) {
+			if ( ! ( is.null(x@RFfiles[[name]]) + is.null(x@distRF[[name]] ) ) ) {
 				## OK - check if they are done and summarize the results
 				notDone=FALSE
 				for ( f in x@RFfiles[[name]] ){
@@ -106,10 +106,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				run = FALSE
 			}
 			else if ( ! is.null(x@distRF[[name]]) ){
-				print ( "This has already been analyzed!" )
-			}
-			else if ( file.exists( paste(sep='/', x@tmp.path,paste('RFclust.SGE.',x@name,'.RData', sep=''))) & ! force  ) {
-				stop ( "The source data has already been saved to disk - sure you want to re-run the analysis? use force=TRUE")
+				print ( "This has already been analyzed! Use a different name if you want to re-analyze this dataset" )
 			}
 			else {
 				if ( x@slices == 1 && ! x@SGE ) {
@@ -140,7 +137,6 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 			x
 		}
 )
-
 
 
 #' @name writeRscript
