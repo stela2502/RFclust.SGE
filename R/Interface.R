@@ -116,7 +116,6 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				}
 				else {
 					## (1) create the RF object file
-					browser()
 					srcObj = paste(sep='/', x@tmp.path,paste( x@name,'.RData', sep='')  )
 					save( x, file= srcObj)
 					## (2) create and run x@slices worker files
