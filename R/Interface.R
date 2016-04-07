@@ -93,6 +93,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				## OK - check if they are done and summarize the results
 				notDone=FALSE
 				for ( f in x@RFfiles[[name]] ){
+					f <- file.path(x@tmp.path, basename(f) )
 					if ( locked(f) ) {
 						notDone = TRUE
 						break
@@ -116,7 +117,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				}
 				else {
 					## (1) create the RF object file
-					srcObj = paste(sep='/', x@tmp.path,paste( x@name,'.RData', sep='')  )
+					srcObj = file.path( x@tmp.path,paste( x@name,'.RData', sep='')  )
 					save( x, file= srcObj)
 					## (2) create and run x@slices worker files
 					this.forests = round(nforest/x@slices )

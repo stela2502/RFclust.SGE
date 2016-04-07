@@ -280,7 +280,7 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 	returnRF <- NULL
 	waited = 0
 	read = 0
-	files <- x@RFfiles[[name]]
+	files <- file.path(x@tmp.path, basename(x@RFfiles[[name]]) )
 	while ( read < length(files) ){
 		if (locked( files[1]) ) {
 			print ( paste ( "wating for files to unlock!  ( n =",waited,")"))
