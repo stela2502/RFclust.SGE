@@ -93,6 +93,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				## OK - check if they are done and summarize the results
 				notDone=FALSE
 				for ( f in x@RFfiles[[name]] ){
+					f <- file.path( x@tmp.path, basename( f))
 					if ( locked(f) ) {
 						notDone = TRUE
 						break
