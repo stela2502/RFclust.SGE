@@ -67,6 +67,8 @@ setMethod('show', signature = c ('RFclust.SGE'),
 	}
 )
 
+
+
 #' @name runRFclust
 #' @aliases runRFclust,RFclust.SGE-method
 #' @rdname runRFclust-methods
