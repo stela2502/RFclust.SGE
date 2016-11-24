@@ -94,8 +94,8 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 			if ( ! is.null(x@RFfiles[[name]])  ) {
 				## OK - check if they are done and summarize the results
 				notDone=FALSE
+				x@RFfiles <- lapply(  x@RFfiles, function( oldF ) { file.path( x@tmp.path, basename(oldF) ) } )
 				for ( f in x@RFfiles[[name]] ){
-					f <- file.path( x@tmp.path, basename(f))
 					if ( locked(f) ) {
 						notDone = TRUE
 						print ( paste( "output file",f,"does not exists") )
