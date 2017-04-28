@@ -1,5 +1,6 @@
 
 source("https://bioconductor.org/biocLite.R")
+useDevel(devel=TRUE)
 biocLite()
 
 install.packages( 
