@@ -6,7 +6,7 @@ install.packages(
 )
 
 source("https://bioconductor.org/biocLite.R")
-useDevel(devel=TRUE)
+#useDevel(devel=TRUE)
 biocLite(ask=FALSE)
 
 if (!library("devtools", quietly = TRUE,logical.return=TRUE )) {
