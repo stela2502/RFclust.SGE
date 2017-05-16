@@ -1,10 +1,6 @@
 try ({
-install.packages( 
-		lib  = lib <- .libPaths()[1],
-		pkgs = as.data.frame(installed.packages(), stringsAsFactors=FALSE)$Package,
-		type = 'source',  
-		repos='https://ftp.acc.umu.se/mirror/CRAN/'
-) } )
+			update.packages(ask = FALSE, repos='https://ftp.acc.umu.se/mirror/CRAN/')
+ } )
 
 source("https://bioconductor.org/biocLite.R")
 #useDevel(devel=TRUE)
