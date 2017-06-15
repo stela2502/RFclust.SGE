@@ -30,4 +30,3 @@ The function returns a vector of clustering labels.
 
 Copyright 2003 Tao Shi and Steve Horvath (last modified 10/31/03)
 }
-

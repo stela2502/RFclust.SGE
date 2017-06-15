@@ -16,4 +16,3 @@ save.RF(Rf.data, fname)
 \description{
 Store a calculate.RF result in a file for later usage (threading)
 }
-

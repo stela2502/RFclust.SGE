@@ -14,7 +14,7 @@ An S4 class to run unsupervides clustering based on random forrest predictors us
 \section{Slots}{
 
 \describe{
-\item{\code{dat}}{the data that should be clustered (data.frame with column == samples rows == observations)}
+\item{\code{dat}}{the data that should be clustered (data.frame with column ==  samples rows ==  observations)}
 
 \item{\code{email}}{the users email for the SGE report}
 
@@ -22,7 +22,7 @@ An S4 class to run unsupervides clustering based on random forrest predictors us
 
 \item{\code{tmp.path}}{the temp path for the clustering results}
 
-\item{\code{SGE}}{run using Sun Grid Engine (default=F)}
+\item{\code{SGE}}{run using Sun Grid Engine (default= F)}
 
 \item{\code{distRF}}{the density data (internal use only)}
 

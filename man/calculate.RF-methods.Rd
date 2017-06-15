@@ -37,4 +37,3 @@ and later on during the clean up of the different threads be read using read.RF
 
 The return list can be processed using the RFdist method
 }
-

@@ -6,8 +6,8 @@
 \alias{RFclust.SGE,RFclust.SGE-method}
 \title{description of function RFclust.SGE}
 \usage{
-RFclust.SGE(dat, tmp.path = "", email = "", slices = 32, SGE = FALSE,
-  name = "RFclust")
+RFclust.SGE(dat, ..., tmp.path = "", email = "", slices = 32,
+  SGE = FALSE, slurm = FALSE, name = "RFclust")
 }
 \arguments{
 \item{dat}{data frame or matrix containing all expression data}
@@ -17,6 +17,8 @@ RFclust.SGE(dat, tmp.path = "", email = "", slices = 32, SGE = FALSE,
 \item{slices}{how many threads to span}
 
 \item{SGE}{whether to use the Sun Grid Engine to calcualate}
+
+\item{slurm}{whether to use the slurm grid engine to crunch the data (default =F)}
 }
 \value{
 A new RFclust.SGE object
@@ -24,4 +26,3 @@ A new RFclust.SGE object
 \description{
 create a new RFclust.SGE object. The clustering will be performed on the columns of the data.frame.
 }
-
