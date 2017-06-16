@@ -8,17 +8,18 @@
 #' @param SGE whether to use the Sun Grid Engine to calcualate
 #' @param slurm whether to use the slurm grid engine to crunch the data (default =F)
 #' @param slices how many threads to span
+#' @param settings the settings for the SLURM process (only 'A', 't' and 'p' are used)
 #' @return A new RFclust.SGE object
 #' @title description of function RFclust.SGE
 #' @export 
 setGeneric('RFclust.SGE', ## Name
-		function ( dat, ...,tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust' ) { ## Argumente der generischen Funktion
+		function ( dat, ...,tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) { ## Argumente der generischen Funktion
 			standardGeneric('RFclust.SGE') ## der Aufruf von standardGeneric sorgt für das Dispatching
 		}
 )
 
 setMethod('RFclust.SGE', signature = c ('data.frame'),
-		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust' ) {
+		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) {
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
@@ -37,14 +38,15 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			if ( slurm ) {
 				err= NULL
 				for ( so in c('A', 't') ){
-					if ( ! exists('A')){
+					if ( is.null(settings[[so]]) ){
 						err = paste( err, paste("The slurm option",so,"is missing!" ),sep="\n" )
 					}
 				}
 				if ( ! is.null(err) ){
 					stop ( err )
 				}
-				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, settings=list( 'A' = A, 't'= t ) )
+				## capture all possible SURM options
+				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, settings= settings )
 			}
 			else{
 				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=F, settings=list( ) )
@@ -144,6 +146,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 			}
 			else {
 				if ( x@slices == 1 && ! ( x@SGE || x@slurm) ) {
+					run = T
 					datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=ntree, no.rep=nforest )
 					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
 					## fix the cl1 part
@@ -153,6 +156,10 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 					names(x@distRF)[length(x@distRF) ] = name
 				}
 				else {
+					run = TRUE
+					if (  x@SGE || x@slurm ) {
+						run = FALSE
+					}
 					## (1) create the RF object file
 					srcObj = paste(sep='/', x@tmp.path,paste( x@name,'.RData', sep='')  )
 					save( x, file= srcObj)
@@ -160,7 +167,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 					this.forests = round(nforest/x@slices )
 					scripts = vector('character', length= x@slices )
 					for ( i in 1:x@slices ) {
-						ret <- writeRscript( x, paste('runRFclust',name,i,sep='_'), ntree=ntree, nforest=this.forests,srcObj=srcObj, run = !x@SGE, total.n =  this.forests*x@slices )
+						ret <- writeRscript( x, paste('runRFclust',name,i,sep='_'), ntree=ntree, nforest=this.forests,srcObj=srcObj, run = run, total.n =  this.forests*x@slices )
 						if ( x@SGE ){
 							writeSGEscript( x, paste('runRFclust',name,i,sep='_'), ret$cmd )
 						}
@@ -296,11 +303,15 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			)
 			if ( length(grep( "^lu", x@settings$A)) ){
 				l <- c( l, "#SBATCH -p lu")
+			}else if ( ! is.null(settings$p)){
+				l <- c( l, paste("#SBATCH -p", x@settings$p ))
 			}
 			writeLines ( c(l,cmd ), con=fileConn )
 			close(fileConn)
 			#	print ( script )
-			system( paste("sbatch",script) )
+			if ( ! x@debug ){
+				system( paste("sbatch",script) )
+			}
 		}
 )
 

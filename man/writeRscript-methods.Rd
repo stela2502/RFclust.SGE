@@ -6,7 +6,8 @@
 \alias{writeRscript,RFclust.SGE-method}
 \title{description of function writeRscript}
 \usage{
-writeRscript(x, filename, ntree = 500, nforest = 500, run = TRUE, srcObj)
+writeRscript(x, filename, ntree = 500, nforest = 500, run = TRUE, srcObj,
+  total.n = NULL)
 }
 \arguments{
 \item{filename}{the filename to save the R script to (has to be unique for the analysis!)}
@@ -14,6 +15,8 @@ writeRscript(x, filename, ntree = 500, nforest = 500, run = TRUE, srcObj)
 \item{ntree}{the number of trees to grow}
 
 \item{nforest}{the nuber of forests to create}
+
+\item{total.n}{the total number of forests to calcualte}
 }
 \value{
 a filename for the expected data
