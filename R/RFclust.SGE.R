@@ -267,12 +267,6 @@ setMethod('calculate.RF', signature = c ('data.frame'),
 		data.frame(cbind(yy,rbind(dat,data.frame(g2(dat)))))
 	}
 	
-	cleandist <- function(x) { 
-		x1 <- as.dist(x)
-		x1[x1<=0] <- 0.0000000001
-		as.matrix(x1)
-	}
-	
 	Rf.data <- vector('list', no.rep +1)
 	syn.n <- nrow1 <- dim(datRF)[[1]]
 	if ( syn.n > max.syn ) {
@@ -352,11 +346,6 @@ setMethod('RFdist', signature = c ('list'),
 			####################################################################
 			
 			
-			cleandist <- function(x) { 
-				x1 <- as.dist(x)
-				x1[x1<=0] <- 0.0000000001
-				as.matrix(x1)
-			}
 			no.rep <- length(Rf.data)
 			nrow1 <- dim(datRF)[[1]]
 			ncol1 <- dim(datRF)[[2]]
@@ -387,12 +376,17 @@ setMethod('RFdist', signature = c ('list'),
 				i = i +1
 			}
 			
-			distRFAddcl1 <- cleandist(sqrt(1-RFproxAddcl1/no.rep))
-			
-			distRF <- list(cl1=NULL, err1=NULL, imp1=NULL, prox1Conver=NULL, 
+#			cleandist <- function(x) { 
+#				x1 <- as.dist(x)
+#				x1[x1<=0] <- 0.0000000001
+#				as.matrix(x1)
+#			}
+#			distRFAddcl1 <- cleandist(sqrt(1-RFproxAddcl1/no.rep))
+			#distRF$cl1 <- cleandist(sqrt(1-distRF$cl1/no.rep))
+			distRF <- list(cl1=NULL, err1=NULL, imp1=NULL, prox1Conver=NULL, RFproxAddcl1 = RFproxAddcl1,
 					cl2=NULL, err2=NULL, imp2=NULL, prox2Conver=NULL)
 			
-			distRF$cl1 <- distRFAddcl1
+			#distRF$cl1 <- distRFAddcl1
 			distRF$err1 <- RFerrrate1
 			if(imp) distRF$imp1 <- RFimportance1 
 			if(proxConver) distRF$prox1Conver <- RFprox1Conver
@@ -437,18 +431,17 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 							}
 							else {
 								load(files[i])
-								a <- 1 + length(returnRF)
-								for ( z in 1:length(datRF)){
-									returnRF[[a]] <- datRF[[z]]
-									a = a +1
+								for( n in names( datRF )){
+									returnRF[[n]] = returnRF[[n]] + datRF[[n]]
 								}
-								read = read +1
 							}
 							
 						}
 					}
 				}	
 			}
+			
+			returnRF$err1 =  returnRF$err1 / length(files)
 			returnRF
 		} )
 

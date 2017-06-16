@@ -106,6 +106,14 @@ setGeneric('runRFclust',
 )
 setMethod('runRFclust', signature = c ('RFclust.SGE'),
 		definition = function ( x, ntree=500, nforest=500, name="RFrun", force=FALSE ) {
+			
+			
+			cleandist <- function(x) { 
+				x1 <- as.dist(x)
+				x1[x1<=0] <- 0.0000000001
+				as.matrix(x1)
+			}
+
 			## the most simple - one core no whistles
 			run = TRUE
 			if ( ! is.null(x@RFfiles[[name]])  ) {
@@ -120,8 +128,13 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 					}
 				}
 				if ( notDone ){ stop( "Process has not finished!") }
-				datRF = read.RF( x, name, 20 )
-				x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
+				distRF = read.RF( x, name, 20 )
+				
+				distRF$cl1 <- cleandist(sqrt(1-distRF$RFproxAddcl1/ntree))
+				distRF$RFproxAddcl1 = NULL
+				#x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
+				
+				x@distRF[[length(x@distRF) +1 ]] = distRF
 				names(x@distRF)[length(x@distRF) ] = name
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
@@ -133,6 +146,10 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				if ( x@slices == 1 && ! ( x@SGE || x@slurm) ) {
 					datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=ntree, no.rep=nforest )
 					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
+					## fix the cl1 part
+					x@distRF[[length(x@distRF)]]$cl1 <- cleandist(sqrt(1-x@distRF[[length(x@distRF)]]$RFproxAddcl1/ntree))
+					x@distRF[[length(x@distRF)]]$RFproxAddcl1 = NULL
+					
 					names(x@distRF)[length(x@distRF) ] = name
 				}
 				else {
@@ -143,7 +160,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 					this.forests = round(nforest/x@slices )
 					scripts = vector('character', length= x@slices )
 					for ( i in 1:x@slices ) {
-						ret <- writeRscript( x, paste('runRFclust',name,i,sep='_'), ntree=ntree, nforest=this.forests,srcObj=srcObj, run = !x@SGE )
+						ret <- writeRscript( x, paste('runRFclust',name,i,sep='_'), ntree=ntree, nforest=this.forests,srcObj=srcObj, run = !x@SGE, total.n =  this.forests*x@slices )
 						if ( x@SGE ){
 							writeSGEscript( x, paste('runRFclust',name,i,sep='_'), ret$cmd )
 						}
@@ -172,17 +189,21 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 #' @param filename the filename to save the R script to (has to be unique for the analysis!)
 #' @param ntree the number of trees to grow
 #' @param nforest the nuber of forests to create
+#' @param total.n the total number of forests to calcualte
 #' @title description of function writeRscript
 #' @return a filename for the expected data
 #' @export 
 setGeneric('writeRscript',
-		function (x,filename, ntree=500, nforest=500, run=TRUE, srcObj ){
+		function (x,filename, ntree=500, nforest=500, run=TRUE, srcObj, total.n = NULL ){
 			standardGeneric('writeRscript')
 		}
 )
 setMethod('writeRscript', signature = c ('RFclust.SGE'),
-		definition = function ( x,filename, ntree=500, nforest=500, run=TRUE, srcObj  ) {
+		definition = function ( x,filename, ntree=500, nforest=500, run=TRUE, srcObj, total.n = NULL  ) {
 			#print ( paste( "Run =",run)) 
+			if ( is.null(total.n) ){
+				stop( "Libraray change - I now need a total.n value" )
+			}
 			wp <- paste(sep='/', x@tmp.path, filename )
 			rscript <-  paste(wp, '.R', sep='')
 			Rdata <-  paste(wp, '.RData', sep='')
@@ -192,6 +213,7 @@ setMethod('writeRscript', signature = c ('RFclust.SGE'),
 							paste('load("',srcObj,'")', sep='' ),
 							'#reads object x',
 							paste('datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=',ntree,', no.rep=',nforest,' )'),
+							paste('datRF = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=',ntree,' )'),
 							paste('save( datRF, file="',Rdata,'")', sep='' ),
 							paste('release.lock("',Rdata,'")',sep='')
 					), con=fileConn )
