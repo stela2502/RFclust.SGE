@@ -114,93 +114,7 @@ setMethod('collect.garbage', signature = c ('missing'),
 	while (gc()[2,4] != gc()[2,4]){}
 } )
 
-#' @name RFdist
-#' @aliases RFdist,RFclust.SGE-method
-#' @rdname RFdist-methods
-#' @docType methods 
-#' @description Initially this function did perform the unsupervised clustering,
-#' @description but the most calculation has been exported to the threadable function
-#' @description \link{calculate.RF}
-#' @param Rf.data  TEXT MISSING
-#' @param datRF  TEXT MISSING
-#' @param imp  TEXT MISSING default=T
-#' @param no.tree  TEXT MISSING
-#' @param proxConver  TEXT MISSING default=F
-#' @title description of function RFdist
-#' @export 
-setGeneric('RFdist', ## Name
-	function (Rf.data, datRF, imp=T, no.tree, proxConver=F) { ## Argumente der generischen Funktion
-		standardGeneric('RFdist') ## der Aufruf von standardGeneric sorgt für das Dispatching
-	}
-)
 
-setMethod('RFdist', signature = c ('list'),
-	definition = function (Rf.data, datRF, imp=T, no.tree, proxConver=F) {
-	
-	####################################################################
-# Unsupervised randomForest function                               #
-# Return a list "distRF" containing some of the following 6 fields #
-#  depending on the options specified:                             #
-#  (1) cl1:  addcl1 distance (sqrt(1-RF.proxAddcl1))               #
-#  (2) err1: error rate                                            #
-#  (3) imp1: variable importance for addcl1                        #
-#  (4) prox1Conver: a matrix containing two convergence meausres   #
-#                   for addcl1 proximity                           #
-#                   a). max( abs( c(aveprox(N))-c(aveprox(N-1))))  #
-#                   b). mean((c(aveprox(N))-c(aveprox(N-1)))^2)    #
-#                   where N is number of forests (no.rep).         #
-#  (5) cl2, (6) err2, (7)imp2 and (8) prox2Conver for addcl2       #
-# Copyright Steve Horvath and Tao Shi (2004)                       #
-	####################################################################
-	
-	
-	cleandist <- function(x) { 
-		x1 <- as.dist(x)
-		x1[x1<=0] <- 0.0000000001
-		as.matrix(x1)
-	}
-	no.rep <- length(Rf.data)
-	nrow1 <- dim(datRF)[[1]]
-	ncol1 <- dim(datRF)[[2]]
-	RFproxAddcl1 <- matrix(0,nrow=nrow1,ncol=nrow1)
-	RFprox1Conver <- cbind(1:no.rep,matrix(0,(no.rep),3))
-	RFimportance1 <- matrix(0, nrow=ncol1, ncol=4)
-	RFerrrate1 <- 0
-	rep1 <- rep(666,2*nrow1) 
-	i = 0;
-	while( length(Rf.data) > 0 ) {
-		yy <- Rf.data[[1]]$yy
-		importance <- Rf.data[[1]]$importance
-		err.rate <- Rf.data[[1]]$err.rate
-		RF1prox <- Rf.data[[1]]$RF1prox
-		if (i > 0) { 
-			if (i > 1){
-				xx <- ((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i) - (RFproxAddcl1/(i-1))
-				yy <- mean( c(as.dist((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i))) 
-				RFprox1Conver[i,2] <- max(abs(c(as.dist(xx))))
-				RFprox1Conver[i,3] <- mean((c(as.dist(xx)))^2)
-				RFprox1Conver[i,4] <- yy
-			}
-			RFproxAddcl1 <- RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]) 
-			if(imp) { RFimportance1 <- RFimportance1+ 1/no.rep*(importance) }
-			RFerrrate1 <- RFerrrate1+ 1/no.rep*(err.rate[no.tree])
-		}
-		Rf.data[[1]] <- NULL
-		i = i +1
-	}
-	
-	distRFAddcl1 <- cleandist(sqrt(1-RFproxAddcl1/no.rep))
-	
-	distRF <- list(cl1=NULL, err1=NULL, imp1=NULL, prox1Conver=NULL, 
-			cl2=NULL, err2=NULL, imp2=NULL, prox2Conver=NULL)
-	
-	distRF$cl1 <- distRFAddcl1
-	distRF$err1 <- RFerrrate1
-	if(imp) distRF$imp1 <- RFimportance1 
-	if(proxConver) distRF$prox1Conver <- RFprox1Conver
-	
-	distRF
-} )
 #' @name set.lock
 #' @aliases set.lock,RFclust.SGE-method
 #' @rdname set.lock-methods
@@ -259,57 +173,7 @@ setMethod('locked', signature = c ('character'),
 	}
 	ret
 } )
-#' @name read.RF
-#' @aliases read.RF,RFclust.SGE-method
-#' @rdname read.RF-methods
-#' @docType methods
-#' @description This function reads a set of outfiles and creates a summary Rf.data
-#' @description object that can be processed using the RFdist() function.
-#' @param files  a list of files created by save.RF() default=c('')
-#' @param max.wait maximum time to wait for the files to become accessable default= 20
-#' @title description of function read.RF
-#' @export 
-setGeneric('read.RF', ## Name
-	function (x, name, max.wait = 20 ) { ## Argumente der generischen Funktion
-		standardGeneric('read.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
-	}
-)
 
-setMethod('read.RF', signature = c ('RFclust.SGE'),
-	definition = function (x, name, max.wait = 20 ) {
-	returnRF <- NULL
-	waited = 0
-	read = 0
-	files <- x@RFfiles[[name]]
-	x@RFfiles <- lapply(  x@RFfiles, function( oldF ) { file.path( x@tmp.path, basename(oldF) ) } )
-	while ( read < length(files) ){
-		if (locked( files[1] ) ) {
-			print ( paste ( "wating for files to unlock!  ( n =",waited,")", files[1]))
-		}
-		else {
-			for ( i in 1:length(files) ) {
-				if ( ! locked( files[i]) ) {
-					if ( i == 1 ){
-						load(files[i])
-						returnRF <- datRF
-						read = read +1
-					}
-					else {
-						load(files[i])
-						a <- 1 + length(returnRF)
-						for ( z in 1:length(datRF)){
-							returnRF[[a]] <- datRF[[z]]
-							a = a +1
-						}
-						read = read +1
-					}
-					
-				}
-			}
-		}	
-	}
-	returnRF
-} )
 #' @name save.RF
 #' @aliases save.RF,RFclust.SGE-method
 #' @rdname save.RF-methods
@@ -403,12 +267,6 @@ setMethod('calculate.RF', signature = c ('data.frame'),
 		data.frame(cbind(yy,rbind(dat,data.frame(g2(dat)))))
 	}
 	
-	cleandist <- function(x) { 
-		x1 <- as.dist(x)
-		x1[x1<=0] <- 0.0000000001
-		as.matrix(x1)
-	}
-	
 	Rf.data <- vector('list', no.rep +1)
 	syn.n <- nrow1 <- dim(datRF)[[1]]
 	if ( syn.n > max.syn ) {
@@ -447,6 +305,145 @@ setMethod('calculate.RF', signature = c ('data.frame'),
 	Rf.data
 } )
 
+#' @name RFdist
+#' @aliases RFdist,RFclust.SGE-method
+#' @rdname RFdist-methods
+#' @docType methods 
+#' @description Initially this function did perform the unsupervised clustering,
+#' @description but the most calculation has been exported to the threadable function
+#' @description \link{calculate.RF}
+#' @param Rf.data  TEXT MISSING
+#' @param datRF  TEXT MISSING
+#' @param imp  TEXT MISSING default=T
+#' @param no.tree  TEXT MISSING
+#' @param proxConver  TEXT MISSING default=F
+#' @title description of function RFdist
+#' @export 
+setGeneric('RFdist', ## Name
+		function (Rf.data, datRF, imp=T, no.tree, proxConver=F) { ## Argumente der generischen Funktion
+			standardGeneric('RFdist') ## der Aufruf von standardGeneric sorgt für das Dispatching
+		}
+)
+
+
+setMethod('RFdist', signature = c ('list'),
+		definition = function (Rf.data, datRF, imp=T, no.tree, proxConver=F) {
+			
+			####################################################################
+# Unsupervised randomForest function                               #
+# Return a list "distRF" containing some of the following 6 fields #
+#  depending on the options specified:                             #
+#  (1) cl1:  addcl1 distance (sqrt(1-RF.proxAddcl1))               #
+#  (2) err1: error rate                                            #
+#  (3) imp1: variable importance for addcl1                        #
+#  (4) prox1Conver: a matrix containing two convergence meausres   #
+#                   for addcl1 proximity                           #
+#                   a). max( abs( c(aveprox(N))-c(aveprox(N-1))))  #
+#                   b). mean((c(aveprox(N))-c(aveprox(N-1)))^2)    #
+#                   where N is number of forests (no.rep).         #
+#  (5) cl2, (6) err2, (7)imp2 and (8) prox2Conver for addcl2       #
+# Copyright Steve Horvath and Tao Shi (2004)                       #
+			####################################################################
+			
+			
+			no.rep <- length(Rf.data)
+			nrow1 <- dim(datRF)[[1]]
+			ncol1 <- dim(datRF)[[2]]
+			RFproxAddcl1 <- matrix(0,nrow=nrow1,ncol=nrow1)
+			RFprox1Conver <- cbind(1:no.rep,matrix(0,(no.rep),3))
+			RFimportance1 <- matrix(0, nrow=ncol1, ncol=4)
+			RFerrrate1 <- 0
+			rep1 <- rep(666,2*nrow1) 
+			i = 0;
+			while( length(Rf.data) > 0 ) {
+				yy <- Rf.data[[1]]$yy
+				importance <- Rf.data[[1]]$importance
+				err.rate <- Rf.data[[1]]$err.rate
+				RF1prox <- Rf.data[[1]]$RF1prox
+				if (i > 0) { 
+					if (i > 1){
+						xx <- ((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i) - (RFproxAddcl1/(i-1))
+						yy <- mean( c(as.dist((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i))) 
+						RFprox1Conver[i,2] <- max(abs(c(as.dist(xx))))
+						RFprox1Conver[i,3] <- mean((c(as.dist(xx)))^2)
+						RFprox1Conver[i,4] <- yy
+					}
+					RFproxAddcl1 <- RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]) 
+					if(imp) { RFimportance1 <- RFimportance1+ 1/no.rep*(importance) }
+					RFerrrate1 <- RFerrrate1+ 1/no.rep*(err.rate[no.tree])
+				}
+				Rf.data[[1]] <- NULL
+				i = i +1
+			}
+			
+#			cleandist <- function(x) { 
+#				x1 <- as.dist(x)
+#				x1[x1<=0] <- 0.0000000001
+#				as.matrix(x1)
+#			}
+#			distRFAddcl1 <- cleandist(sqrt(1-RFproxAddcl1/no.rep))
+			#distRF$cl1 <- cleandist(sqrt(1-distRF$cl1/no.rep))
+			distRF <- list(cl1=NULL, err1=NULL, imp1=NULL, prox1Conver=NULL, RFproxAddcl1 = RFproxAddcl1,
+					cl2=NULL, err2=NULL, imp2=NULL, prox2Conver=NULL)
+			
+			#distRF$cl1 <- distRFAddcl1
+			distRF$err1 <- RFerrrate1
+			if(imp) distRF$imp1 <- RFimportance1 
+			if(proxConver) distRF$prox1Conver <- RFprox1Conver
+			
+			distRF
+		} )
+		
+#' @name read.RF
+#' @aliases read.RF,RFclust.SGE-method
+#' @rdname read.RF-methods
+#' @docType methods
+#' @description This function reads a set of outfiles and creates a summary Rf.data
+#' @description object that can be processed using the RFdist() function.
+#' @param files  a list of files created by save.RF() default=c('')
+#' @param max.wait maximum time to wait for the files to become accessable default= 20
+#' @title description of function read.RF
+#' @export 
+setGeneric('read.RF', ## Name
+		function (x, name, max.wait = 20 ) { ## Argumente der generischen Funktion
+			standardGeneric('read.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
+		}
+)
+
+setMethod('read.RF', signature = c ('RFclust.SGE'),
+		definition = function (x, name, max.wait = 20 ) {
+			returnRF <- NULL
+			waited = 0
+			read = 0
+			files <- x@RFfiles[[name]]
+			x@RFfiles <- lapply(  x@RFfiles, function( oldF ) { file.path( x@tmp.path, basename(oldF) ) } )
+			while ( read < length(files) ){
+				if (locked( files[1] ) ) {
+					print ( paste ( "wating for files to unlock!  ( n =",waited,")", files[1]))
+				}
+				else {
+					for ( i in 1:length(files) ) {
+						if ( ! locked( files[i]) ) {
+							if ( i == 1 ){
+								load(files[i])
+								returnRF <- datRF
+								read = read +1
+							}
+							else {
+								load(files[i])
+								for( n in names( datRF )){
+									returnRF[[n]] = returnRF[[n]] + datRF[[n]]
+								}
+							}
+							
+						}
+					}
+				}	
+			}
+			
+			returnRF$err1 =  returnRF$err1 / length(files)
+			returnRF
+		} )
 
 #' @name pwd
 #' @aliases pwd

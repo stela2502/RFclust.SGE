@@ -14,4 +14,3 @@ locked(filename)
 \description{
 simple check for a file lock (threading)
 }
-

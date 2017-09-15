@@ -14,4 +14,3 @@ release.lock(filename)
 \description{
 releases the lock of a file (threading)
 }
-

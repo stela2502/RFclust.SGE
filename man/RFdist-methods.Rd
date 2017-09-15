@@ -26,4 +26,3 @@ but the most calculation has been exported to the threadable function
 
 \link{calculate.RF}
 }
-

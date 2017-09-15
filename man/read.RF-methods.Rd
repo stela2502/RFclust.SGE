@@ -18,4 +18,3 @@ This function reads a set of outfiles and creates a summary Rf.data
 
 object that can be processed using the RFdist() function.
 }
-

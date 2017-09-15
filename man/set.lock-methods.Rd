@@ -14,4 +14,3 @@ set.lock(filename)
 \description{
 set a lock for a file (threading)
 }
-
