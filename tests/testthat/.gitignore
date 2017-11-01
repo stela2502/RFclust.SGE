@@ -1,5 +1,6 @@
 /test.ExpressionSet.r.Rout
 /.RData
+<<<<<<< HEAD
 /runRFclust_RFrun_1.R
 /runRFclust_RFrun_1.RData
 /runRFclust_RFrun_1.Rout
@@ -102,3 +103,7 @@
 /runRFclust_RFrun2_2.R
 /runRFclust_RFrun2_2.RData
 /runRFclust_RFrun2_2.Rout
+=======
+runRFclust_RFrun_*
+runRFclust_RFrun2*
+>>>>>>> fe5a63d82b64f4c325394a62fc386413e23feed2
