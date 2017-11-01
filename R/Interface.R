@@ -12,13 +12,13 @@
 #' @title description of function RFclust.SGE
 #' @export 
 setGeneric('RFclust.SGE', ## Name
-		function ( dat, ...,tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust' ) { ## Argumente der generischen Funktion
+		function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', A=NULL, t=NULL, ... ) { ## Argumente der generischen Funktion
 			standardGeneric('RFclust.SGE') ## der Aufruf von standardGeneric sorgt für das Dispatching
 		}
 )
 
 setMethod('RFclust.SGE', signature = c ('data.frame'),
-		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust' ) {
+		definition = function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', A=NULL, t=NULL ) {
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
@@ -36,15 +36,16 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			}
 			if ( slurm ) {
 				err= NULL
-				for ( so in c('A', 't') ){
-					if ( ! exists('A')){
-						err = paste( err, paste("The slurm option",so,"is missing!" ),sep="\n" )
-					}
+				if ( is.null(A) ) {
+					err = paste( err, paste("The slurm option 'A' is missing!" ),sep="\n" )		
+				}
+				if ( is.null('t')) {
+					err = paste( err, paste("The slurm option 't' is missing!" ),sep="\n" )	
 				}
 				if ( ! is.null(err) ){
 					stop ( err )
 				}
-				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, settings=list( 'A' = A, 't'= t ) )
+				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, 'A' = A, 't'= t  )
 			}
 			else{
 				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=F, settings=list( ) )

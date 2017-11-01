@@ -15,4 +15,3 @@ Usage: 1. immediately call this function after you call a function or
 
 2. rm()
 }
-

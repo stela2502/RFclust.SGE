@@ -23,4 +23,3 @@ run the random forest calculations returning the density matrix
 
 at the moment without SGE support and single core
 }
-

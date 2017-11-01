@@ -18,4 +18,3 @@ The function computes the (adjusted) Rand index between two partitions
 
 Copyright Steve Horvath and Luohua Jiang, UCLA, 2003
 }
-

@@ -24,7 +24,9 @@ setClass(
         settings = 'list',
         distRF = 'list',
         RFfiles = 'list',
-        name = 'character'
+        name = 'character',
+		A='character',
+		t='character'
     ),
     prototype(tmp.path = NA_character_,  email =  NA_character_,
         slices = 32, SGE= FALSE, distRF = list(), RFfiles = list(), settings = list()
