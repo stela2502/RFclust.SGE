@@ -46,6 +46,7 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 					stop ( err )
 				}
 				## capture all possible SURM options
+				#print ("I create a slurm RFclust object!")
 				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, settings= settings )
 			}
 			else{
@@ -115,7 +116,6 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				x1[x1<=0] <- 0.0000000001
 				as.matrix(x1)
 			}
-
 			## the most simple - one core no whistles
 			run = TRUE
 			if ( ! is.null(x@RFfiles[[name]])  ) {
@@ -291,7 +291,7 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			script <- paste(wp, '.sh', sep='')
 			fileConn<-file( script )
 			
-
+			
 			l <- c( '#! /bin/bash',
 					'#SBATCH -n 1',
 					'#SBATCH -N 1',
@@ -303,7 +303,7 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			)
 			if ( length(grep( "^lu", x@settings$A)) ){
 				l <- c( l, "#SBATCH -p lu")
-			}else if ( ! is.null(settings$p)){
+			}else if ( ! is.null(x@settings$p)){
 				l <- c( l, paste("#SBATCH -p", x@settings$p ))
 			}
 			writeLines ( c(l,cmd ), con=fileConn )
