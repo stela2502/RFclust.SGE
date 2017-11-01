@@ -18,7 +18,7 @@ setGeneric('RFclust.SGE', ## Name
 )
 
 setMethod('RFclust.SGE', signature = c ('data.frame'),
-		definition = function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', A=NULL, t=NULL ) {
+		definition = function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', A=NULL, t=NULL,... ) {
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
@@ -267,11 +267,12 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			l <- c( '#! /bin/bash',
 					'#SBATCH -n 1',
 					'#SBATCH -N 1',
-					paste('#SBATCH -t ', x@settings$t),
+					paste('#SBATCH -t ', x@t),
 					paste("#SBATCH -J '", filename,"'",sep=''),
 					paste("#SBATCH -o '", filename,"_omp_%j.out'",sep=''),
 					paste("#SBATCH -e '", filename,"_omp_%j.err'",sep=''),
-					paste("#SBATCH -A ",x@settings$A )
+					paste("#SBATCH -A ",x@A ),
+					paste("#SBATCH -p dell")
 			)
 			if ( length(grep( "^lu", x@settings$A)) ){
 				l <- c( l, "#SBATCH -p lu")
@@ -279,6 +280,7 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			writeLines ( c(l,cmd ), con=fileConn )
 			close(fileConn)
 			#	print ( script )
+			browser()
 			system( paste("sbatch",script) )
 		}
 )
