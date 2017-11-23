@@ -1,6 +1,9 @@
 /test.ExpressionSet.r.Rout
 /.RData
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 894acc669f67decc6dc940b8effa1b64163b04e8
 /runRFclust_RFrun_1.R
 /runRFclust_RFrun_1.RData
 /runRFclust_RFrun_1.Rout
@@ -97,6 +100,7 @@
 /runRFclust_RFrun_9.R
 /runRFclust_RFrun_9.RData
 /runRFclust_RFrun_9.Rout
+<<<<<<< HEAD
 /runRFclust_RFrun2_1.R
 /runRFclust_RFrun2_1.RData
 /runRFclust_RFrun2_1.Rout
@@ -107,3 +111,10 @@
 runRFclust_RFrun_*
 runRFclust_RFrun2*
 >>>>>>> fe5a63d82b64f4c325394a62fc386413e23feed2
+=======
+/runRFclust_RFrun_1.sh
+/runRFclust_RFrun_1_omp_3091.err
+/runRFclust_RFrun_1_omp_3091.out
+/runRFclust_RFrun_1_omp_3093.err
+/runRFclust_RFrun_1_omp_3093.out
+>>>>>>> 894acc669f67decc6dc940b8effa1b64163b04e8

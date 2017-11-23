@@ -13,13 +13,21 @@
 #' @title description of function RFclust.SGE
 #' @export 
 setGeneric('RFclust.SGE', ## Name
+<<<<<<< HEAD
 		function ( dat, ...,tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) { ## Argumente der generischen Funktion
+=======
+		function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', A=NULL, t=NULL, ... ) { ## Argumente der generischen Funktion
+>>>>>>> 894acc669f67decc6dc940b8effa1b64163b04e8
 			standardGeneric('RFclust.SGE') ## der Aufruf von standardGeneric sorgt für das Dispatching
 		}
 )
 
 setMethod('RFclust.SGE', signature = c ('data.frame'),
+<<<<<<< HEAD
 		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) {
+=======
+		definition = function ( dat, tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', A=NULL, t=NULL,... ) {
+>>>>>>> 894acc669f67decc6dc940b8effa1b64163b04e8
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
@@ -37,17 +45,29 @@ setMethod('RFclust.SGE', signature = c ('data.frame'),
 			}
 			if ( slurm ) {
 				err= NULL
+<<<<<<< HEAD
 				for ( so in c('A', 't') ){
 					if ( is.null(settings[[so]]) ){
 						err = paste( err, paste("The slurm option",so,"is missing!" ),sep="\n" )
 					}
+=======
+				if ( is.null(A) ) {
+					err = paste( err, paste("The slurm option 'A' is missing!" ),sep="\n" )		
+				}
+				if ( is.null('t')) {
+					err = paste( err, paste("The slurm option 't' is missing!" ),sep="\n" )	
+>>>>>>> 894acc669f67decc6dc940b8effa1b64163b04e8
 				}
 				if ( ! is.null(err) ){
 					stop ( err )
 				}
+<<<<<<< HEAD
 				## capture all possible SURM options
 				#print ("I create a slurm RFclust object!")
 				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, settings= settings )
+=======
+				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=T, 'A' = A, 't'= t  )
+>>>>>>> 894acc669f67decc6dc940b8effa1b64163b04e8
 			}
 			else{
 				ret <- new ( 'RFclust.SGE', dat= dat, email=email, tmp.path=tmp.path, slices=slices, SGE=F, slurm=F, settings=list( ) )
@@ -295,11 +315,12 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			l <- c( '#! /bin/bash',
 					'#SBATCH -n 1',
 					'#SBATCH -N 1',
-					paste('#SBATCH -t ', x@settings$t),
+					paste('#SBATCH -t ', x@t),
 					paste("#SBATCH -J '", filename,"'",sep=''),
 					paste("#SBATCH -o '", filename,"_omp_%j.out'",sep=''),
 					paste("#SBATCH -e '", filename,"_omp_%j.err'",sep=''),
-					paste("#SBATCH -A ",x@settings$A )
+					paste("#SBATCH -A ",x@A ),
+					paste("#SBATCH -p dell")
 			)
 			if ( length(grep( "^lu", x@settings$A)) ){
 				l <- c( l, "#SBATCH -p lu")
