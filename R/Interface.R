@@ -21,7 +21,11 @@ setGeneric('RFclust.SGE', ## Name
 			standardGeneric('RFclust.SGE') ## der Aufruf von standardGeneric sorgt für das Dispatching
 		}
 )
-
+#setMethod('RFclust.SGE', signature = c ('data.frame'),
+#		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) {
+#			RFclust.SGE( as.matrix(dat), ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() )
+#		}
+#)
 setMethod('RFclust.SGE', signature = c ('data.frame'),
 <<<<<<< HEAD
 		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) {
@@ -245,7 +249,7 @@ setMethod('writeRscript', signature = c ('RFclust.SGE'),
 							paste('release.lock("',Rdata,'")',sep='')
 					), con=fileConn )
 			close(fileConn)
-			cmd <- paste('R CMD BATCH --no-save --no-restore --no-readline --', rscript ) 
+			cmd <- paste('R CMD BATCH --no-save --no-restore --no-readline --max-ppsize=500000 --', rscript ) 
 			if ( run ) {
 				system( paste(cmd,"&" ) )
 			}
