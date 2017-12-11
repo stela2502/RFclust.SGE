@@ -299,11 +299,11 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			l <- c( '#! /bin/bash',
 					'#SBATCH -n 1',
 					'#SBATCH -N 1',
-					paste('#SBATCH -t ', x@t),
+					paste('#SBATCH -t ', x@settings$t),
 					paste("#SBATCH -J '", filename,"'",sep=''),
 					paste("#SBATCH -o '", filename,"_omp_%j.out'",sep=''),
 					paste("#SBATCH -e '", filename,"_omp_%j.err'",sep=''),
-					paste("#SBATCH -A ",x@A ),
+					paste("#SBATCH -A ",x@settings$A ),
 					paste("#SBATCH -p dell")
 			)
 			if ( length(grep( "^lu", x@settings$A)) ){

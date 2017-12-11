@@ -6,7 +6,7 @@ rf <- RFclust.SGE ( dat=dat, SGE=F, slices=1 )
 
 #expect_equal( dim(groups), c(100,6))
 
-rf <-  RFclust.SGE ( dat=dat, SGE=F, slices=2, name="SLURM",  A = "lsens2017-3-2", t="00:20:00" , slurm=T )
+rf <-  RFclust.SGE ( dat=dat, SGE=F, slices=2, name="SLURM", settings = list( A = "lsens2017-3-2", t="00:20:00" , slurm=T) )
 rf <- runRFclust ( rf, nforest=5)
 
 #rf <- RFclust.SGE ( dat=dat, SGE=F, slices=2 )
