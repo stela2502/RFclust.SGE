@@ -431,10 +431,10 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 							}
 							else {
 								load(files[i])
-
 								for( n in names( datRF )){
 									returnRF[[n]] = returnRF[[n]] + datRF[[n]]
 								}
+								cat (".")
 							}
 							
 						}

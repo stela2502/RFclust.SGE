@@ -134,6 +134,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 					}
 				}
 				if ( notDone ){ stop( "Process has not finished!") }
+				print ("Reading result files")
 				distRF = read.RF( x, name, 20 )
 				
 				distRF$cl1 <- cleandist(sqrt(1-distRF$RFproxAddcl1/ntree))
