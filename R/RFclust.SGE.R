@@ -417,30 +417,28 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 			read = 0
 			files <- x@RFfiles[[name]]
 			x@RFfiles <- lapply(  x@RFfiles, function( oldF ) { file.path( x@tmp.path, basename(oldF) ) } )
-			while ( read < length(files) ){
-				if (locked( files[1] ) ) {
-					print ( paste ( "wating for files to unlock!  ( n =",waited,")", files[1]))
-				}
-				else {
-					for ( i in 1:length(files) ) {
-						if ( ! locked( files[i]) ) {
-							if ( i == 1 ){
-								load(files[i])
-								returnRF <- datRF
-								read = read +1
-							}
-							else {
-								load(files[i])
-								for( n in names( datRF )){
-									returnRF[[n]] = returnRF[[n]] + datRF[[n]]
-								}
-								cat (".")
-							}
-							
-						}
+			print (paste ("Reading",length(files),"result files"))
+			for ( i in 1:length(files) ){
+				if ( ! locked( files[i]) ) {
+					if ( i == 1 ){
+						load(files[i])
+						returnRF <- datRF
 					}
-				}	
+					else {
+						load(files[i])
+						for( n in names( datRF )){
+							returnRF[[n]] = returnRF[[n]] + datRF[[n]]
+						}
+						cat (".")
+					}
+							
+				}else {
+					stop( paste("Error: File", files[i], "not finished" ) )
+				}
 			}
+					
+			print ( "files read")
+			
 			
 			returnRF$err1 =  returnRF$err1 / length(files)
 			returnRF
