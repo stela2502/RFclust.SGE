@@ -419,6 +419,7 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 			x@RFfiles <- lapply(  x@RFfiles, function( oldF ) { file.path( x@tmp.path, basename(oldF) ) } )
 			print (paste ("Reading",length(files),"result files"))
 			for ( i in 1:length(files) ){
+				print ( paste("reading file",files[i] ) )
 				if ( ! locked( files[i]) ) {
 					if ( i == 1 ){
 						load(files[i])

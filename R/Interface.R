@@ -145,6 +145,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				names(x@distRF)[length(x@distRF) ] = name
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
+				print ( "read and processed the RF data" )
 			}
 			else if ( ! is.null(x@distRF[[name]]) ){
 				print ( "This has already been analyzed! Use a different name if you want to re-analyze this dataset" )
@@ -296,7 +297,6 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			script <- paste(wp, '.sh', sep='')
 			fileConn<-file( script )
 			
-			
 			l <- c( '#! /bin/bash',
 					'#SBATCH -n 1',
 					'#SBATCH -N 1',
@@ -304,8 +304,7 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 					paste("#SBATCH -J '", filename,"'",sep=''),
 					paste("#SBATCH -o '", filename,"_omp_%j.out'",sep=''),
 					paste("#SBATCH -e '", filename,"_omp_%j.err'",sep=''),
-					paste("#SBATCH -A ",x@settings$A ),
-					paste("#SBATCH -p dell")
+					paste("#SBATCH -A ",x@settings$A )
 			)
 			if ( length(grep( "^lu", x@settings$A)) ){
 				l <- c( l, "#SBATCH -p lu")
