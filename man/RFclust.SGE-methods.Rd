@@ -7,7 +7,7 @@
 \title{description of function RFclust.SGE}
 \usage{
 RFclust.SGE(dat, ..., tmp.path = "", email = "", slices = 32,
-  SGE = FALSE, slurm = FALSE, name = "RFclust")
+  SGE = FALSE, slurm = FALSE, name = "RFclust", settings = list())
 }
 \arguments{
 \item{dat}{data frame or matrix containing all expression data}
@@ -19,6 +19,8 @@ RFclust.SGE(dat, ..., tmp.path = "", email = "", slices = 32,
 \item{SGE}{whether to use the Sun Grid Engine to calcualate}
 
 \item{slurm}{whether to use the slurm grid engine to crunch the data (default =F)}
+
+\item{settings}{the settings for the SLURM process (only 'A', 't' and 'p' are used)}
 }
 \value{
 A new RFclust.SGE object
