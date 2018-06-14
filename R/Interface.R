@@ -22,6 +22,7 @@ setGeneric('RFclust.SGE', ## Name
 #			RFclust.SGE( as.matrix(dat), ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() )
 #		}
 #)
+
 setMethod('RFclust.SGE', signature = c ('data.frame'),
 		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) {
 			if ( tmp.path == '' ){
