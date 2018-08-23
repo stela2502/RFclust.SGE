@@ -344,7 +344,6 @@ setGeneric('createGroups',
 setMethod('createGroups', signature = c ('RFclust.SGE'),
 		definition = function (x, k,name='RFrun' ) {
 			n = k[1]
-			#browser()
 			persistingCells <- colnames( x@dat )
 			res = pamNew(x@distRF[[name]]$cl1, n )
 			N <- names( res )
