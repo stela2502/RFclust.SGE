@@ -297,9 +297,11 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			wp <- paste(sep='/', x@tmp.path, filename )
 			script <- paste(wp, '.sh', sep='')
 			fileConn<-file( script )
-			
+			if ( is.null(x@settings$n)) {
+				x@settings$n = 1
+			} 
 			l <- c( '#! /bin/bash',
-					'#SBATCH -n 1',
+					paste('#SBATCH -n', x@settings$n),
 					'#SBATCH -N 1',
 					paste('#SBATCH -t ', x@settings$t),
 					paste("#SBATCH -J '", filename,"'",sep=''),

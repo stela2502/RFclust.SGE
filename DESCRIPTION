@@ -14,8 +14,8 @@ Collate:
     'Interface.R'
 Depends:
     MASS,
+    Hmisc,
     cluster,
     survival,
-    randomForest,
-    Hmisc
+    randomForest
 RoxygenNote: 6.0.1
