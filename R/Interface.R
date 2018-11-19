@@ -317,7 +317,7 @@ setMethod('writeSLURMscript', signature = c ('RFclust.SGE'),
 			if ( ! is.null( x@settings$begin) ) {
 				l <- c( l, paste("#SBATCH --begin=", x@settings$begin, sep="" ))
 			}
-			writeLines ( c(l,cmd ), con=fileConn )
+			writeLines ( c(l,cmd, 'exit 0' ), con=fileConn )
 			close(fileConn)
 			#	print ( script )
 			if ( ! x@debug ){
