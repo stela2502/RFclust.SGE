@@ -85,6 +85,15 @@ setMethod('pamNew', signature = c ('matrix'),
 		if(!is.null(dimnames(x)[[1]])) { original.row.names <- dimnames(x)[[1]]}
 		row.names(x) <- as.character(c(1:dim(x)[[1]]))
 	}
+	## this should probably be transfered to 
+	## pam2 <- cluster::clara ( x, k, samples= 50, sampsize=ncol(x), pamLike=TRUE)
+	## label4 <- pam2$clustering
+	## silinfo2 <- pam2$silinfo$widths
+	## index2 <- as.numeric(as.character(row.names(silinfo2)))
+	## silinfo4 <- silinfo2[order(index2),]
+	## labelnew2 <- ifelse(silinfo4[,3]<0, silinfo4[,2], silinfo4[,1])
+	## names(labelnew2) <- original.row.names
+	# browser() # the other thing is not that much faster...
 	pam1 <- cluster::pam(x,k,diss=diss1, metric=metric1)
 	label2 <- pam1$clustering
 	silinfo1 <- pam1$silinfo$widths
