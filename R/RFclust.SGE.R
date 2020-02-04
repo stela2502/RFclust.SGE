@@ -7,9 +7,9 @@
 #' @param tab the data table
 #' @param adjust just leave it ... default=T
 #' @title description of function Rand
-setGeneric('Rand', ## Name
-	function (tab,adjust=T) { ## Argumente der generischen Funktion
-		standardGeneric('Rand') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('Rand', 
+	function (tab,adjust=T) { 
+		standardGeneric('Rand') 
 	}
 )
 
@@ -66,9 +66,9 @@ setMethod('Rand', signature = c ('RFclust.SGE'),
 #' @param metric1  TEXT MISSING default= "euclidean"
 #' @title description of function pamNew
 #' @export 
-setGeneric('pamNew', ## Name
-	function (x, k, diss1 = inherits(x, "dist"), metric1 = "euclidean") { ## Argumente der generischen Funktion
-		standardGeneric('pamNew') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('pamNew', 
+	function (x, k, diss1 = inherits(x, "dist"), metric1 = "euclidean") { 
+		standardGeneric('pamNew') 
 	}
 )
 
@@ -111,9 +111,9 @@ setMethod('pamNew', signature = c ('matrix'),
 #' @description Usage: 1. immediately call this function after you call a function or
 #' @description        2. rm()
 #' @title description of function collect.garbage
-setGeneric('collect.garbage', ## Name
-	function (x) { ## Argumente der generischen Funktion
-		standardGeneric('collect.garbage') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('collect.garbage', 
+	function (x) { 
+		standardGeneric('collect.garbage')
 	}
 )
 
@@ -132,9 +132,9 @@ setMethod('collect.garbage', signature = c ('missing'),
 #' @param filename  the locked file
 #' @title description of function set_lock
 #' @export 
-setGeneric('set.lock', ## Name
-	function ( filename ) { ## Argumente der generischen Funktion
-		standardGeneric('set.lock') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('set.lock', 
+	function ( filename ) { 
+		standardGeneric('set.lock')
 	}
 )
 
@@ -150,9 +150,9 @@ setMethod('set.lock', signature = c ('character'),
 #' @param filename  the locked file
 #' @title description of function release_lock
 #' @export 
-setGeneric('release.lock', ## Name
-	function ( filename ) { ## Argumente der generischen Funktion
-		standardGeneric('release.lock') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('release.lock', 
+	function ( filename ) { 
+		standardGeneric('release.lock')
 	}
 )
 
@@ -168,9 +168,9 @@ setMethod('release.lock', signature = c ('character'),
 #' @param filename  lock this file
 #' @title description of function locked
 #' @export 
-setGeneric('locked', ## Name
-	function ( filename ) { ## Argumente der generischen Funktion
-		standardGeneric('locked') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('locked', 
+	function ( filename ) { 
+		standardGeneric('locked')
 	}
 )
 
@@ -192,9 +192,9 @@ setMethod('locked', signature = c ('character'),
 #' @param fname  the file to store the data in
 #' @title description of function save.RF
 #' @export 
-setGeneric('save.RF', ## Name
-	function ( Rf.data , fname ) { ## Argumente der generischen Funktion
-		standardGeneric('save.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('save.RF', 
+	function ( Rf.data , fname ) { 
+		standardGeneric('save.RF')
 	}
 )
 
@@ -239,9 +239,9 @@ setMethod('save.RF', signature = c ('RFclust.SGE'),
 #' @param max.syn  max synthetic data width default=50
 #' @title description of function calculate.RF
 #' @export 
-setGeneric('calculate.RF', ## Name
-	function ( datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) { ## Argumente der generischen Funktion
-		standardGeneric('calculate.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('calculate.RF', 
+	function ( datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) { 
+		standardGeneric('calculate.RF')
 	}
 )
 
@@ -328,9 +328,9 @@ setMethod('calculate.RF', signature = c ('data.frame'),
 #' @param proxConver  TEXT MISSING default=F
 #' @title description of function RFdist
 #' @export 
-setGeneric('RFdist', ## Name
-		function (Rf.data, datRF, imp=T, no.tree, proxConver=F) { ## Argumente der generischen Funktion
-			standardGeneric('RFdist') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('RFdist', 
+		function (Rf.data, datRF, imp=T, no.tree, proxConver=F) { 
+			standardGeneric('RFdist')
 		}
 )
 
@@ -413,9 +413,9 @@ setMethod('RFdist', signature = c ('list'),
 #' @param max.wait maximum time to wait for the files to become accessable default= 20
 #' @title description of function read.RF
 #' @export 
-setGeneric('read.RF', ## Name
-		function (x, name, max.wait = 20 ) { ## Argumente der generischen Funktion
-			standardGeneric('read.RF') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('read.RF', 
+		function (x, name, max.wait = 20 ) { 
+			standardGeneric('read.RF')
 		}
 )
 
@@ -461,9 +461,9 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 #' @description  uses the linux pwd command to determin the working directory 
 #' @return A string containing the working directory 
 #' @title description of function pwd
-setGeneric('pwd', ## Name
-		function ( a ) { ## Argumente der generischen Funktion
-			standardGeneric('pwd') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('pwd', 
+		function ( a ) { 
+			standardGeneric('pwd')
 		}
 )
 

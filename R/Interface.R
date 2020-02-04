@@ -12,9 +12,9 @@
 #' @return A new RFclust.SGE object
 #' @title description of function RFclust.SGE
 #' @export 
-setGeneric('RFclust.SGE', ## Name
-		function ( dat, ...,tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) { ## Argumente der generischen Funktion
-			standardGeneric('RFclust.SGE') ## der Aufruf von standardGeneric sorgt für das Dispatching
+setGeneric('RFclust.SGE', 
+		function ( dat, ...,tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) { 
+			standardGeneric('RFclust.SGE')
 		}
 )
 #setMethod('RFclust.SGE', signature = c ('data.frame'),
