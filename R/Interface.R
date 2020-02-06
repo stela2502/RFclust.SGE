@@ -143,6 +143,7 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				#x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
 				
 				x@distRF [[length(x@distRF) +1 ]] = distRF
+				colnames(x@distRF[[length(x@distRF)]]) =  rownames(x@distRF[[length(x@distRF)]]) = colnames( x@dat )
 				names(x@distRF)[length(x@distRF) ] = name
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
