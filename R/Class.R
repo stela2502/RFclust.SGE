@@ -2,7 +2,7 @@
 #' @title RFclust.SGE
 #' @docType package
 #' @description  An S4 class to run unsupervides clustering based on random forrest predictors using the Sun Grid Engine.
-#' @slot dat the data that should be clustered (data.frame with column ==  samples rows ==  observations)
+#' @slot dat the data that should be clustered (dgCMatrix with column ==  samples rows ==  observations)
 #' @slot email the users email for the SGE report
 #' @slot slices the number of slices the data should be analyzed in
 #' @slot tmp.path the temp path for the clustering results
@@ -15,7 +15,7 @@
 setClass(
     Class = 'RFclust.SGE',
     representation =  representation (
-        dat = 'data.frame',
+        dat = 'dgCMatrix',
         email = 'character',
         slices = 'numeric',
         tmp.path = 'character',

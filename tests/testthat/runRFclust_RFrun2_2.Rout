@@ -1,6 +1,11 @@
 
-R version 3.3.2 (2016-10-31) -- "Sincere Pumpkin Patch"
-Copyright (C) 2016 The R Foundation for Statistical Computing
+   File /home/med-sal/.Renviron contains invalid line(s)
+      1e0f4fd3ead241ecab13b644710ebabf6730027d
+   They were ignored
+
+
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -18,42 +23,27 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > library(RFclust.SGE)
+Loading required package: Matrix
 Loading required package: MASS
-Loading required package: cluster
-Loading required package: survival
-Loading required package: randomForest
-randomForest 4.6-12
-Type rfNews() to see new features/changes/bug fixes.
 Loading required package: Hmisc
 Loading required package: lattice
+Loading required package: survival
 Loading required package: Formula
 Loading required package: ggplot2
 
-Attaching package: ‘ggplot2’
-
-The following object is masked from ‘package:randomForest’:
-
-    margin
-
-
 Attaching package: ‘Hmisc’
-
-The following object is masked from ‘package:randomForest’:
-
-    combine
 
 The following objects are masked from ‘package:base’:
 
-    format.pval, round.POSIXt, trunc.POSIXt, units
+    format.pval, units
 
-> set.lock("/home/stefanl/git/RFclust.SGE/tests/testthat//runRFclust_RFrun2_2.RData")
-> load("/home/stefanl/git/RFclust.SGE/tests/testthat//.RData")
+Loading required package: cluster
+Loading required package: ranger
+> set.lock("/home/med-sal/git_Projects/RFclust.SGE/tests/testthat//runRFclust_RFrun2_2.RData")
+> load("/home/med-sal/git_Projects/RFclust.SGE/tests/testthat//.RData")
 > #reads object x
-> datRF = calculate.RF(data.frame(t(x@dat)),  no.tree= 500 , no.rep= 5  )
-> datRF = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree= 500  )
-> save( datRF, file="/home/stefanl/git/RFclust.SGE/tests/testthat//runRFclust_RFrun2_2.RData")
-> release.lock("/home/stefanl/git/RFclust.SGE/tests/testthat//runRFclust_RFrun2_2.RData")
-> 
-> proc.time()
-   user  system elapsed 
-  5.436   2.564   5.677 
+> datRF = calculate.RF(Matrix::t(x@dat),  no.tree= 500 , no.rep= 5  )
+Error in intI(i, n = x@Dim[1], dn[[1]], give.dn = FALSE) : 
+  index larger than maximal 100
+Calls: calculate.RF ... callGeneric -> eval -> eval -> [ -> [ -> subCsp_rows -> intI
+Execution halted

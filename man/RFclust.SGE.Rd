@@ -3,7 +3,6 @@
 \docType{package}
 \name{RFclust.SGE}
 \alias{RFclust.SGE}
-\alias{RFclust.SGE-package}
 \title{RFclust.SGE}
 \source{
 \url{https://labs.genetics.ucla.edu/horvath/RFclustering/RFclustering.htm}
@@ -14,7 +13,7 @@ An S4 class to run unsupervides clustering based on random forrest predictors us
 \section{Slots}{
 
 \describe{
-\item{\code{dat}}{the data that should be clustered (data.frame with column ==  samples rows ==  observations)}
+\item{\code{dat}}{the data that should be clustered (dgCMatrix with column ==  samples rows ==  observations)}
 
 \item{\code{email}}{the users email for the SGE report}
 

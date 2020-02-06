@@ -3,7 +3,7 @@
 #' @rdname RFclust.SGE-methods
 #' @docType methods
 #' @description  create a new RFclust.SGE object. The clustering will be performed on the columns of the data.frame.
-#' @param dat data frame or matrix containing all expression data
+#' @param dat dgCMatrix containing all expression data
 #' @param tmp.path where to store the temporaray files
 #' @param SGE whether to use the Sun Grid Engine to calcualate
 #' @param slurm whether to use the slurm grid engine to crunch the data (default =F)
@@ -23,7 +23,7 @@ setGeneric('RFclust.SGE',
 #		}
 #)
 
-setMethod('RFclust.SGE', signature = c ('data.frame'),
+setMethod('RFclust.SGE', signature = c ('dgCMatrix'),
 		definition = function ( dat, ..., tmp.path='', email='', slices=32, SGE=FALSE, slurm=FALSE, name='RFclust', settings=list() ) {
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
@@ -138,11 +138,11 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 				print ("Reading result files")
 				distRF = read.RF( x, name, 20 )
 				
-				distRF$cl1 <- cleandist(sqrt(1-distRF$RFproxAddcl1/ntree))
-				distRF$RFproxAddcl1 = NULL
+				distRF <- cleandist(sqrt(1-distRF/ntree))
+				
 				#x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
 				
-				x@distRF[[length(x@distRF) +1 ]] = distRF
+				x@distRF [[length(x@distRF) +1 ]] = distRF
 				names(x@distRF)[length(x@distRF) ] = name
 				x@RFfiles[[name]] <- NULL
 				run = FALSE
@@ -154,12 +154,12 @@ setMethod('runRFclust', signature = c ('RFclust.SGE'),
 			else {
 				if ( x@slices == 1 && ! ( x@SGE || x@slurm) ) {
 					run = T
-					datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=ntree, no.rep=nforest )
-					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=ntree )
+					datRF = calculate.RF(Matrix::t(x@dat),  no.tree=ntree, no.rep=nforest )
+					x@distRF[[length(x@distRF) +1 ]] = RFdist( datRF ,Matrix::t(x@dat), imp=TRUE , no.tree=ntree )
 					## fix the cl1 part
-					x@distRF[[length(x@distRF)]]$cl1 <- cleandist(sqrt(1-x@distRF[[length(x@distRF)]]$RFproxAddcl1/ntree))
-					x@distRF[[length(x@distRF)]]$RFproxAddcl1 = NULL
-					
+					##browser()
+					x@distRF[[length(x@distRF)]] <- cleandist(sqrt(1-x@distRF[[length(x@distRF)]]/ntree))
+					colnames(x@distRF[[length(x@distRF)]]) =  rownames(x@distRF[[length(x@distRF)]]) = colnames( x@dat )
 					names(x@distRF)[length(x@distRF) ] = name
 				}
 				else {
@@ -226,8 +226,8 @@ setMethod('writeRscript', signature = c ('RFclust.SGE'),
 							paste('set.lock("',Rdata,'")',sep=''),
 							paste('load("',srcObj,'")', sep='' ),
 							'#reads object x',
-							paste('datRF = calculate.RF(data.frame(t(x@dat)),  no.tree=',ntree,', no.rep=',nforest,' )'),
-							paste('datRF = RFdist( datRF ,t(x@dat), imp=TRUE , no.tree=',ntree,' )'),
+							paste('datRF = calculate.RF(Matrix::t(x@dat),  no.tree=',ntree,', no.rep=',nforest,' )'),
+							paste('datRF = RFdist( datRF ,Matrix::t(x@dat), imp=TRUE , no.tree=',ntree,' )'),
 							paste('save( datRF, file="',Rdata,'")', sep='' ),
 							paste('release.lock("',Rdata,'")',sep='')
 					), con=fileConn )
@@ -347,22 +347,28 @@ setMethod('createGroups', signature = c ('RFclust.SGE'),
 		definition = function (x, k,name='RFrun' ) {
 			n = k[1]
 			persistingCells <- colnames( x@dat )
-			res = pamNew(x@distRF[[name]]$cl1, n )
-			N <- names( res )
-			N <- intersect( persistingCells, N )
-			userGroups <- matrix(ncol=3, nrow=0)
-			for ( a in 1:length(N) ){
-				userGroups <- rbind (userGroups, c( N[a], 'no info', as.numeric(res[[N[a]]]) ) )
+			if ( is.null( x@distRF[[name]] )) {
+				stop(paste("the RF run name",name,"has no data - stpping"))
 			}
+			res = pamNew(x@distRF[[name]], n )
+
+			N <- names( res )
+
+			N <- intersect( persistingCells, N )
+
+			if ( length(N) == 0 ){
+				stop("no sample matches the internal data!")
+			}
+			
+			userGroups <- as.matrix(data.frame( cellName = N,  userInput = rep('no info', length(N)), unlist( lapply(N, function(n){ res[[n]]})) ) )
+			
 			if ( length(k) > 1 ){
 				for ( i in 2:length(k) ) {
 					if ( i > 1) {
-						res = pamNew(x@distRF[[name]]$cl1, k[i] )
+						res = pamNew(x@distRF[[name]], k[i] )
 						n <- vector('numeric', length= length(N))
-						for ( a in 1:length(N) ){
-							n[a] <- as.numeric(res[[N[a]]])
-						}
-						userGroups <- cbind( userGroups, n )
+						names( res ) = N
+						userGroups <- cbind( userGroups, unlist( lapply(N, function(n){ res[[n]]})) )
 					}
 				}
 			}

@@ -12,10 +12,13 @@ Collate:
     'Class.R'
     'RFclust.SGE.R'
     'Interface.R'
+Remotes: 
+    sonejilab/FastWilcoxTest
 Depends:
+    Matrix,
     MASS,
     Hmisc,
     cluster,
     survival,
-    randomForest
-RoxygenNote: 6.0.1
+    ranger
+RoxygenNote: 7.0.2

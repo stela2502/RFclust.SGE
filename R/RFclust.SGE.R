@@ -245,40 +245,20 @@ setGeneric('calculate.RF',
 	}
 )
 
-setMethod('calculate.RF', signature = c ('data.frame'),
+setMethod('calculate.RF', signature = c ('dgCMatrix'),
 	definition = function ( datRF = NULL, mtry1=3, no.rep= 20, no.tree= 500, addcl1=TRUE, addcl2=FALSE,  imp=T, oob.prox1=T, max.syn=50) {
 	
 	synthetic1 <- function(dat, syn.n=NULL) {
-		sample1 <- function(X)   { sample(X, replace=T) } 
-		g1      <- function(dat) { apply(dat,2,sample1) }
-		nrow1 <- dim(dat)[[1]]
-		yy <- rep(c(1,2),c(nrow1,nrow1) )
-		data.frame(cbind(yy,rbind(dat,data.frame(g1(dat)))))
-	}
-	
-	synthetic1.1 <- function(dat) {
-		sample1 <- function(X)   { sample(X, replace=T) } 
-		g1      <- function(dat) { apply(dat,2,sample1) }
-		nrow1 <- dim(dat)[[1]]
-		syn.n <- nrow1
-		if ( syn.n > max.syn ) {
-			syn.n = max.syn 
+		dat =FastWilcoxTest::ShuffleMatrix(dat, syn.n)
+		if ( !is.null(syn.n)){
+			dat = dat[,1:syn.n]
 		}
-		yy <- rep(c(1,2),c(nrow1,syn.n) )
-		data.frame(cbind(yy,rbind(dat,data.frame(g1(dat)[1:syn.n,]))))
+		dat
 	}
-	
-	synthetic2 <- function(dat) {
-		sample2 <- function(X)   { runif(length(X), min=min(X), max =max(X)) }
-		g2      <- function(dat) { apply(dat,2,sample2) }
-		nrow1 <- dim(dat)[[1]];
-		yy <- rep(c(1,2),c(nrow1,nrow1) );
-		data.frame(cbind(yy,rbind(dat,data.frame(g2(dat)))))
-	}
-	
-	Rf.data <- vector('list', no.rep +1)
+
+	Rf.data <- list()
 	syn.n <- nrow1 <- dim(datRF)[[1]]
-	if ( syn.n > max.syn ) {
+	if ( syn.n > round(syn.n * max.syn/100) ) {
 		syn.n = max.syn
 	}
 	ncol1 <- dim(datRF)[[2]]
@@ -289,26 +269,25 @@ setMethod('calculate.RF', signature = c ('data.frame'),
 	}
 	if (addcl1) {
 		for (i in c(0:no.rep))  {
+			## the samples are in the rows here!!!!!
+			if ( interactive() ){
+				cat('.')
+			}else {
+				message( paste("calculate.RF random forest nr.",i,"start at --", paste0(date()),"--"  ))
+			}
 			index1 <- sample(c(1:(nrow1+syn.n))) 
-			rep1[index1] <-  c(1:(nrow1+syn.n)) 
-			datRFsyn <- synthetic1(datRF,syn.n)[index1,] 
+			rep1[index1] <-  c(1:(nrow1+syn.n))
+			datRFsyn <- Matrix::t(synthetic1(Matrix::t(datRF),syn.n))
 			yy <- datRFsyn[,1]
-			RF1 <- randomForest::randomForest(factor(yy)~.,data=datRFsyn[,-1], ntree=no.tree, oob.prox=oob.prox1, proximity=TRUE,do.trace=F,mtry=mtry1,importance=imp)
-			collect.garbage()
-			RF1prox <- RF1$proximity[rep1,rep1]
-			Rf.data[[i+1]] <- list(index1=index1, yy=yy, RF1prox=RF1prox, importance =RF1$importance, err.rate=RF1$err.rate )
-		}
-	}
-	if (addcl2) { 
-		for (i in c(0:no.rep))  {
-			index1 <- sample(c(1:(2*nrow1))) 
-			rep1[index1] <-  c(1:(2*nrow1)) 
-			datRFsyn <- synthetic2(datRF)[index1,] 
-			yy <- datRFsyn[,1] 
-			RF1 <- randomForest::randomForest(factor(yy)~.,data=datRFsyn[,-1], ntree=no.tree, oob.prox=oob.prox1, proximity=TRUE,do.trace=F,mtry=mtry1,importance=imp) 
-			collect.garbage()
-			RF1prox <- RF1$proximity[rep1,rep1]
-			Rf.data[[i+1]] <- list(index1=index1, yy=yy, RF1prox=RF1prox, importance =RF1$importance, err.rate=RF1$err.rate )
+			#RF1 <-ranger::ranger( x=rbind(datRF, datRFsyn), y= factor( c(rep(1, nrow(datRF)), rep(2, nrow(datRFsyn)) )), num.tree=no.tree, verbose=T, keep.inbag=T )
+			RF1 <-ranger::ranger( x=rbind(datRF, datRFsyn), y= factor( c(rep(1, nrow(datRF)), rep(2, nrow(datRFsyn)) )), num.tree=no.tree, verbose=T, keep.inbag=T )
+			pred = predict(RF1, datRF, type = "terminalNodes")$predictions
+			n = nrow(pred)
+			inbag = simplify2array(RF1$inbag.counts)
+			Rf.data[[length(Rf.data)+1]] <- FastWilcoxTest::extract_proximity_oob ( pred, matrix( 0, ncol= n, nrow=n), inbag)
+			if ( ! interactive() ){
+				message( paste("calculate.RF random forest nr.",i,"end at   --", paste0(date()),"--" ))
+			}
 		}
 	}
 	Rf.data
@@ -355,35 +334,44 @@ setMethod('RFdist', signature = c ('list'),
 			####################################################################
 			
 			
-			no.rep <- length(Rf.data)
-			nrow1 <- dim(datRF)[[1]]
-			ncol1 <- dim(datRF)[[2]]
-			RFproxAddcl1 <- matrix(0,nrow=nrow1,ncol=nrow1)
-			RFprox1Conver <- cbind(1:no.rep,matrix(0,(no.rep),3))
-			RFimportance1 <- matrix(0, nrow=ncol1, ncol=4)
-			RFerrrate1 <- 0
-			rep1 <- rep(666,2*nrow1) 
-			i = 0;
-			while( length(Rf.data) > 0 ) {
-				yy <- Rf.data[[1]]$yy
-				importance <- Rf.data[[1]]$importance
-				err.rate <- Rf.data[[1]]$err.rate
-				RF1prox <- Rf.data[[1]]$RF1prox
-				if (i > 0) { 
-					if (i > 1){
-						xx <- ((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i) - (RFproxAddcl1/(i-1))
-						yy <- mean( c(as.dist((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i))) 
-						RFprox1Conver[i,2] <- max(abs(c(as.dist(xx))))
-						RFprox1Conver[i,3] <- mean((c(as.dist(xx)))^2)
-						RFprox1Conver[i,4] <- yy
-					}
-					RFproxAddcl1 <- RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]) 
-					if(imp) { RFimportance1 <- RFimportance1+ 1/no.rep*(importance) }
-					RFerrrate1 <- RFerrrate1+ 1/no.rep*(err.rate[no.tree])
+			# no.rep <- length(Rf.data)
+			# nrow1 <- dim(datRF)[[1]]
+			# ncol1 <- dim(datRF)[[2]]
+			# RFproxAddcl1 <- matrix(0,nrow=nrow1,ncol=nrow1)
+			# RFprox1Conver <- cbind(1:no.rep,matrix(0,(no.rep),3))
+			# RFimportance1 <- matrix(0, nrow=ncol1, ncol=4)
+			# RFerrrate1 <- 0
+			# rep1 <- rep(666,2*nrow1) 
+			# i = 0;
+			distRF = Rf.data[[1]]
+			if ( length(Rf.data) > 1){
+				for( i in 2:length(Rf.data) ){
+					distRF = distRF + Rf.data[[i]]; 
 				}
-				Rf.data[[1]] <- NULL
-				i = i +1
-			}
+			}  
+			
+
+			# while( length(Rf.data) > 0 ) {
+			# 	browser()
+			# 	yy <- Rf.data[[1]]$yy
+			# 	importance <- Rf.data[[1]]$importance
+			# 	err.rate <- Rf.data[[1]]$err.rate
+			# 	RF1prox <- Rf.data[[1]]$RF1prox
+			# 	if (i > 0) { 
+			# 		if (i > 1){
+			# 			xx <- ((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i) - (RFproxAddcl1/(i-1))
+			# 			yy <- mean( c(as.dist((RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]))/i))) 
+			# 			RFprox1Conver[i,2] <- max(abs(c(as.dist(xx))))
+			# 			RFprox1Conver[i,3] <- mean((c(as.dist(xx)))^2)
+			# 			RFprox1Conver[i,4] <- yy
+			# 		}
+			# 		RFproxAddcl1 <- RFproxAddcl1 + (RF1prox[c(1:nrow1),c(1:nrow1)]) 
+			# 		if(imp) { RFimportance1 <- RFimportance1+ 1/no.rep*(importance) }
+			# 		RFerrrate1 <- RFerrrate1+ 1/no.rep*(err.rate[no.tree])
+			# 	}
+			# 	Rf.data[[1]] <- NULL
+			# 	i = i +1
+			# }
 			
 #			cleandist <- function(x) { 
 #				x1 <- as.dist(x)
@@ -392,13 +380,13 @@ setMethod('RFdist', signature = c ('list'),
 #			}
 #			distRFAddcl1 <- cleandist(sqrt(1-RFproxAddcl1/no.rep))
 			#distRF$cl1 <- cleandist(sqrt(1-distRF$cl1/no.rep))
-			distRF <- list(cl1=NULL, err1=NULL, imp1=NULL, prox1Conver=NULL, RFproxAddcl1 = RFproxAddcl1,
-					cl2=NULL, err2=NULL, imp2=NULL, prox2Conver=NULL)
+			# distRF <- list(cl1=NULL, err1=NULL, imp1=NULL, prox1Conver=NULL, RFproxAddcl1 = RFproxAddcl1,
+			# 		cl2=NULL, err2=NULL, imp2=NULL, prox2Conver=NULL)
 			
-			#distRF$cl1 <- distRFAddcl1
-			distRF$err1 <- RFerrrate1
-			if(imp) distRF$imp1 <- RFimportance1 
-			if(proxConver) distRF$prox1Conver <- RFprox1Conver
+			# #distRF$cl1 <- distRFAddcl1
+			# distRF$err1 <- RFerrrate1
+			# if(imp) distRF$imp1 <- RFimportance1 
+			# if(proxConver) distRF$prox1Conver <- RFprox1Conver
 			
 			distRF
 		} )
@@ -436,9 +424,7 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 					}
 					else {
 						load(files[i])
-						for( n in names( datRF )){
-							returnRF[[n]] = returnRF[[n]] + datRF[[n]]
-						}
+						returnRF= returnRF + datRF
 						cat (".")
 					}
 							
@@ -450,7 +436,6 @@ setMethod('read.RF', signature = c ('RFclust.SGE'),
 			print ( "files read")
 			
 			
-			returnRF$err1 =  returnRF$err1 / length(files)
 			returnRF
 		} )
 

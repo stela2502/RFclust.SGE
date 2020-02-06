@@ -6,8 +6,17 @@
 \alias{calculate.RF,RFclust.SGE-method}
 \title{description of function calculate.RF}
 \usage{
-calculate.RF(datRF = NULL, mtry1 = 3, no.rep = 20, no.tree = 500,
-  addcl1 = TRUE, addcl2 = FALSE, imp = T, oob.prox1 = T, max.syn = 50)
+calculate.RF(
+  datRF = NULL,
+  mtry1 = 3,
+  no.rep = 20,
+  no.tree = 500,
+  addcl1 = TRUE,
+  addcl2 = FALSE,
+  imp = T,
+  oob.prox1 = T,
+  max.syn = 50
+)
 }
 \arguments{
 \item{datRF}{the summary object is a list of random forest return values default= NULL}

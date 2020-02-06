@@ -6,8 +6,15 @@
 \alias{writeRscript,RFclust.SGE-method}
 \title{description of function writeRscript}
 \usage{
-writeRscript(x, filename, ntree = 500, nforest = 500, run = TRUE, srcObj,
-  total.n = NULL)
+writeRscript(
+  x,
+  filename,
+  ntree = 500,
+  nforest = 500,
+  run = TRUE,
+  srcObj,
+  total.n = NULL
+)
 }
 \arguments{
 \item{filename}{the filename to save the R script to (has to be unique for the analysis!)}
