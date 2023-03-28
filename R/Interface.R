@@ -28,9 +28,8 @@ setMethod('RFclust.SGE', signature = c ('dgCMatrix'),
 			if ( tmp.path == '' ){
 				tmp.path = pwd()
 			}
-			if ( length(grep( '^/', tmp.path, perl=T)) == 0 ){
-				stop( 'I need the absolute path for the temp path' )
-			}
+
+			tmp.path = R.utils::getAbsolutePath(tmp.path );
 			if ( ! file.exists(tmp.path)){
 				dir.create( tmp.path )
 			}
