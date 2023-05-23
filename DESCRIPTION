@@ -15,10 +15,11 @@ Collate:
 Remotes: 
     sonejilab/FastWilcoxTest
 Depends:
+    cluster,
+    FastWilcoxTest,
+    Hmisc,
     Matrix,
     MASS,
-    Hmisc,
-    cluster,
-    survival,
-    ranger
+    ranger,
+    survival
 RoxygenNote: 7.0.2
